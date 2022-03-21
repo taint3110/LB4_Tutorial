@@ -1,24 +1,24 @@
 version: "3" 
 #NETWORK 
 networks:  
-  my-network: 
+  mongoNetwork: 
     driver: bridge 
 services:  
   myDatabase-service: 
     container_name: 'myDatabase' 
     build:  
-      context: ./lb-4-tutorial
+      context: ./
       dockerfile: Dockerfile 
     image: 'mongo' 
     restart: always 
     environment: 
       - MONGO_INITDB_DATABASE=dev 
       - MONGO_INITDB_ROOT_USERNAME=root 
-      - MONGO_INITDB_ROOT_PASSWORD=password 
+      - MONGO_INITDB_ROOT_PASSWORD=password
  
     volumes: 
       - ./storages/dev/data/db:/data/db 
     ports: 
-      - 4000:4000 
+      - 27017:27017 
     networks: 
-      - my-network
+      - mongoNetwork

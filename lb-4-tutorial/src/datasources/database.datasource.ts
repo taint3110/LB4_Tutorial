@@ -1,12 +1,12 @@
 import {inject, lifeCycleObserver, LifeCycleObserver} from '@loopback/core';
 import {juggler} from '@loopback/repository';
-require('dotenv').config()
+import {configs} from './constant';
 const config = {
   name: 'database',
   connector: 'mongodb',
-  url: process.env.MONGODB_URL,
+  url: configs.MONGODB_URL,
   host: 'localhost',
-  port: 4000,
+  port: 27017,
   user: 'root',
   password: 'password',
   database: 'dev',

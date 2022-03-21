@@ -16,20 +16,20 @@ import {
   requestBody,
 } from '@loopback/rest';
 import {
-  TodoList,
+  Project,
   Todo,
 } from '../models';
-import {TodoListRepository} from '../repositories';
+import {ProjectRepository} from '../repositories';
 
-export class TodoListTodoController {
+export class ProjectTodoController {
   constructor(
-    @repository(TodoListRepository) protected todoListRepository: TodoListRepository,
+    @repository(ProjectRepository) protected projectRepository: ProjectRepository,
   ) { }
 
-  @get('/todo-lists/{id}/todos', {
+  @get('/projects/{id}/todos', {
     responses: {
       '200': {
-        description: 'Array of TodoList has many Todo',
+        description: 'Array of Project has many Todo',
         content: {
           'application/json': {
             schema: {type: 'array', items: getModelSchemaRef(Todo)},
@@ -39,47 +39,47 @@ export class TodoListTodoController {
     },
   })
   async find(
-    @param.path.number('id') id: number,
+    @param.path.string('id') id: string,
     @param.query.object('filter') filter?: Filter<Todo>,
   ): Promise<Todo[]> {
-    return this.todoListRepository.todos(id).find(filter);
+    return this.projectRepository.todos(id).find(filter);
   }
 
-  @post('/todo-lists/{id}/todos', {
+  @post('/projects/{id}/todos', {
     responses: {
       '200': {
-        description: 'TodoList model instance',
+        description: 'Project model instance',
         content: {'application/json': {schema: getModelSchemaRef(Todo)}},
       },
     },
   })
   async create(
-    @param.path.number('id') id: typeof TodoList.prototype.id,
+    @param.path.string('id') id: typeof Project.prototype.id,
     @requestBody({
       content: {
         'application/json': {
           schema: getModelSchemaRef(Todo, {
-            title: 'NewTodoInTodoList',
+            title: 'NewTodoInProject',
             exclude: ['id'],
-            optional: ['todoListId']
+            optional: ['projectId']
           }),
         },
       },
     }) todo: Omit<Todo, 'id'>,
   ): Promise<Todo> {
-    return this.todoListRepository.todos(id).create(todo);
+    return this.projectRepository.todos(id).create(todo);
   }
 
-  @patch('/todo-lists/{id}/todos', {
+  @patch('/projects/{id}/todos', {
     responses: {
       '200': {
-        description: 'TodoList.Todo PATCH success count',
+        description: 'Project.Todo PATCH success count',
         content: {'application/json': {schema: CountSchema}},
       },
     },
   })
   async patch(
-    @param.path.number('id') id: number,
+    @param.path.string('id') id: string,
     @requestBody({
       content: {
         'application/json': {
@@ -90,21 +90,21 @@ export class TodoListTodoController {
     todo: Partial<Todo>,
     @param.query.object('where', getWhereSchemaFor(Todo)) where?: Where<Todo>,
   ): Promise<Count> {
-    return this.todoListRepository.todos(id).patch(todo, where);
+    return this.projectRepository.todos(id).patch(todo, where);
   }
 
-  @del('/todo-lists/{id}/todos', {
+  @del('/projects/{id}/todos', {
     responses: {
       '200': {
-        description: 'TodoList.Todo DELETE success count',
+        description: 'Project.Todo DELETE success count',
         content: {'application/json': {schema: CountSchema}},
       },
     },
   })
   async delete(
-    @param.path.number('id') id: number,
+    @param.path.string('id') id: string,
     @param.query.object('where', getWhereSchemaFor(Todo)) where?: Where<Todo>,
   ): Promise<Count> {
-    return this.todoListRepository.todos(id).delete(where);
+    return this.projectRepository.todos(id).delete(where);
   }
 }

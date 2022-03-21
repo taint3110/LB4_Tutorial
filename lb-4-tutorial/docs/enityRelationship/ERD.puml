@@ -1,0 +1,74 @@
+@startuml Application use cases diagram
+skinparam actorStyle awesome
+title ERD
+
+
+entity TodoList{
+  -id: ObjectId <generated>
+  color: string,
+}
+
+entity Todo{
+  -id: ObjectId <generated>
+  title: string,
+  description: string,
+  isInprogress: boolean,
+  isCodingDone: boolean,
+  isFixing: boolean,
+  isDone: boolean,
+  createAt: Date,
+  updatedAt: Date,
+}
+
+entity Project {
+  -id: ObjectId <generated>
+  title: string,
+  description: string,
+  isInprogress: boolean,
+  isCodingDone: boolean,
+  isFixing: boolean,
+  isDone: boolean,
+  createAt: Date,
+  updatedAt: Date,
+}
+
+entity User {
+  -id: ObjectId <generated>
+  name: string
+  email: string
+  *password: string
+  *phoneNumber: string
+  gender: string
+  createdAt: Date
+  updatedAt: Date
+  roles: array
+}
+
+
+TodoList ||--o{ Project
+Project ||--o{ User
+Project ||--o{ Todo
+User ||--o{ Todo
+' Customer ||--o{
+  
+  ' Customer ||--o{
+    
+    ' Customer ||-- Information
+    ' Agency ||--o{
+      
+      ' Agency ||--o{
+        
+        ' Agency ||--o{
+          
+          ' Agency ||-- Information
+
+          ' Admin "belong to" ||--|| Customer
+
+          ' Customer  ||--o{
+            
+            ' Agency  ||--o{
+              
+              ' Admin  ||--o{
+                
+
+@enduml

@@ -1,8 +1,10 @@
-import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {Entity, model, property, belongsTo, hasMany} from '@loopback/repository';
 import {TodoList} from './todo-list.model';
+import {Todo} from './todo.model';
+import {User} from './user.model';
 
 @model()
-export class Todo extends Entity {
+export class Project extends Entity {
   @property({
     type: 'string',
     id: true,
@@ -57,23 +59,22 @@ export class Todo extends Entity {
   })
   updatedAt?: string;
 
-  @property({
-    type: 'string',
-  })
-  projectId?: string;
+  @belongsTo(() => TodoList)
+  todoListId: string;
 
-  @property({
-    type: 'string',
-  })
-  userId?: string;
+  @hasMany(() => Todo)
+  todos: Todo[];
 
-  constructor(data?: Partial<Todo>) {
+  @hasMany(() => User)
+  users: User[];
+
+  constructor(data?: Partial<Project>) {
     super(data);
   }
 }
 
-export interface TodoRelations {
+export interface ProjectRelations {
   // describe navigational properties here
 }
 
-export type TodoWithRelations = Todo & TodoRelations;
+export type ProjectWithRelations = Project & ProjectRelations;

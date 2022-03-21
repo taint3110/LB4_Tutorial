@@ -9,8 +9,8 @@ import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {MySequence} from './sequence';
-import 'dotenv/config'
-require('dotenv').config()
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env' });
 export {ApplicationConfig};
 
 export class Lb4TutorialApplication extends BootMixin(

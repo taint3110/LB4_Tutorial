@@ -7,21 +7,21 @@ import {
   getModelSchemaRef,
 } from '@loopback/rest';
 import {
-  Todo,
+  Project,
   TodoList,
 } from '../models';
-import {TodoRepository} from '../repositories';
+import {ProjectRepository} from '../repositories';
 
-export class TodoTodoListController {
+export class ProjectTodoListController {
   constructor(
-    @repository(TodoRepository)
-    public todoRepository: TodoRepository,
+    @repository(ProjectRepository)
+    public projectRepository: ProjectRepository,
   ) { }
 
-  @get('/todos/{id}/todo-list', {
+  @get('/projects/{id}/todo-list', {
     responses: {
       '200': {
-        description: 'TodoList belonging to Todo',
+        description: 'TodoList belonging to Project',
         content: {
           'application/json': {
             schema: {type: 'array', items: getModelSchemaRef(TodoList)},
@@ -31,8 +31,8 @@ export class TodoTodoListController {
     },
   })
   async getTodoList(
-    @param.path.number('id') id: typeof Todo.prototype.id,
+    @param.path.string('id') id: typeof Project.prototype.id,
   ): Promise<TodoList> {
-    return this.todoRepository.todoList(id);
+    return this.projectRepository.todoList(id);
   }
 }
