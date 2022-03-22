@@ -13,8 +13,30 @@ export class TodoList extends Entity {
 
   @property({
     type: 'string',
+    required: true,
+  })
+  title?: string;
+
+  @property({
+    type: 'string',
   })
   color?: string;
+
+  @property({
+    type: 'string',
+  })
+  createdBy?: string;
+
+  @property({
+    type: 'Date',
+    default: new Date()
+  })
+  createdAt?: Date;
+
+  @property({
+    type: 'boolean',
+  })
+  isDeleted?: boolean;
 
   @hasMany(() => Project)
   projects: Project[];

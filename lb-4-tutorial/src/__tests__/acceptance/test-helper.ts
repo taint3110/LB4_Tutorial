@@ -1,4 +1,4 @@
-import {Lb4TutorialApplication} from '../..';
+import {AuthApplication} from '../..';
 import {
   createRestAppClient,
   givenHttpServerConfig,
@@ -14,7 +14,7 @@ export async function setupApplication(): Promise<AppWithClient> {
     // port: +process.env.PORT,
   });
 
-  const app = new Lb4TutorialApplication({
+  const app = new AuthApplication({
     rest: restConfig,
   });
 
@@ -27,6 +27,6 @@ export async function setupApplication(): Promise<AppWithClient> {
 }
 
 export interface AppWithClient {
-  app: Lb4TutorialApplication;
+  app: AuthApplication;
   client: Client;
 }

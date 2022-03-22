@@ -51,13 +51,18 @@ export class Project extends Entity {
     type: 'date',
     default: new Date(),
   })
-  createAt?: string;
+  createAt?: Date;
 
   @property({
     type: 'date',
     default: new Date(),
   })
-  updatedAt?: string;
+  updatedAt?: Date;
+
+  @property({
+    type: 'boolean',
+  })
+  isDeleted?: boolean;
 
   @belongsTo(() => TodoList)
   todoListId: string;

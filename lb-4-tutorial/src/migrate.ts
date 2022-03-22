@@ -1,10 +1,10 @@
-import {Lb4TutorialApplication} from './application';
+import {AuthApplication} from './application';
 
 export async function migrate(args: string[]) {
   const existingSchema = args.includes('--rebuild') ? 'drop' : 'alter';
   console.log('Migrating schemas (%s existing schema)', existingSchema);
 
-  const app = new Lb4TutorialApplication();
+  const app = new AuthApplication();
   await app.boot();
   await app.migrateSchema({existingSchema});
 

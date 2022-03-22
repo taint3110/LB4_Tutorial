@@ -38,20 +38,32 @@ export class User extends Entity {
     type: 'date',
     default: new Date(),
   })
-  createdAt?: string;
+  createdAt?: Date;
 
   @property({
     type: 'date',
     default: new Date(),
   })
-  updatedAt?: string;
+  updatedAt?: Date;
 
   @property({
     type: 'array',
     itemType: 'string',
-    default: "user",
+    default: ["user"],
   })
   roles?: string[];
+
+  @property({
+    type: 'boolean',
+    default: false,
+  })
+  isDeleted?: boolean;
+
+  @property({
+    type: 'boolean',
+    default: false,
+  })
+  isActive?: boolean;
 
   @property({
     type: 'string',
