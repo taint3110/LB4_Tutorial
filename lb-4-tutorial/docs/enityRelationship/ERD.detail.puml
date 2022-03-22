@@ -1,0 +1,82 @@
+@startuml Todo
+entity Todo {
+  -id: ObjectId <generated>
+  --
+  ~projectId: ObjectId
+  ~assignedTo: ObjectId
+  ~createdBy: ObjectId
+  --
+  title: string
+  description: string
+  priority: "low" |  "medium" | "high" | "highest"
+  status: "todo" | "in progress" | "coding done"
+  isFixing: boolean
+  isDone: boolean
+  createdAt: Date
+  updatedAt: Date
+  isDeleted: boolean
+}
+entity Project {
+  -id: ObjectID <<generated>>
+  --
+  ~manageBy: ObjectID
+  --
+  *name: string
+  description: string
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+  isDeleted: boolean
+}
+entity User {
+  -id: ObjectId <generated>
+  --
+  name: string
+  *email: string
+  *password: string
+  phoneNumber: string
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+  role: "user" | "admin"
+  isDeleted: boolean
+}
+entity ProjectUser {
+  ~projectId: ObjectId
+  ~userId: ObjectId
+  --
+  createdAt: Date,
+}
+entity TodoLink {
+  ~parentId: ObjectID
+  ~childId: ObjectID
+}
+
+note left of ProjectUser
+  ProjectUser is a relation between Project and User (many to many)
+  User may be added to many projects
+  Projects may have many users
+end note
+
+note left of TodoLink
+  TodoLink is a link between 2 todos in the same project
+end note
+
+User||--o{Todo : has many
+User||--o{ProjectUser : has many
+Project||--o{ProjectUser: has many
+Project||--o{Todo : has many
+
+ProjectUser||--||User : belong to
+ProjectUser||--||Project : belong to
+
+Todo||--o{TodoLink : has many
+
+Todo||--||User: assigned to
+' belong to
+Todo||--||Project: belong to
+TodoLink||--||Todo : belong to parent Todo
+TodoLink||--||Todo : belong to child Todo
+
+
+@enduml
