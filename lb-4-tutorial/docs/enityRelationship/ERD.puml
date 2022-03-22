@@ -5,23 +5,37 @@ title ERD
 
 entity TodoList{
   -id: ObjectId <generated>
-  color: string,
+  --
+  color: string
+  title: string
+  createAt: Date
+  isDeleted: boolean
 }
 
 entity Todo{
   -id: ObjectId <generated>
-  title: string,
-  description: string,
-  isInprogress: boolean,
-  isCodingDone: boolean,
-  isFixing: boolean,
-  isDone: boolean,
-  createAt: Date,
-  updatedAt: Date,
+  --
+  ~id: projectId: ObjectId
+  ~id: assignedTo: ObjectId
+  ~id: createdBy: ObjectId
+  --
+  title: string
+  description: string
+  isInprogress: boolean
+  isCodingDone: boolean
+  isFixing: boolean
+  isDone: boolean
+  createAt: Date
+  updatedAt: Date
+  isDeleted: boolean
 }
 
 entity Project {
   -id: ObjectId <generated>
+  --
+  ~id: todoListId: ObjectId
+  ~id: createdBy: ObjectId
+  --
   title: string,
   description: string,
   isInprogress: boolean,
@@ -30,45 +44,31 @@ entity Project {
   isDone: boolean,
   createAt: Date,
   updatedAt: Date,
+  isDeleted: boolean
 }
 
 entity User {
   -id: ObjectId <generated>
+  --
+  ~id: projectId: ObjectId
+  ~id: todoId: ObjectId
+  ~id: createdBy: ObjectId
+  --
   name: string
   email: string
   *password: string
   *phoneNumber: string
   gender: string
+  isActive: boolean
   createdAt: Date
   updatedAt: Date
   roles: array
+  isDeleted: boolean
 }
 
-
-TodoList ||--o{ Project
-Project ||--o{ User
-Project ||--o{ Todo
-User ||--o{ Todo
-' Customer ||--o{
-  
-  ' Customer ||--o{
-    
-    ' Customer ||-- Information
-    ' Agency ||--o{
-      
-      ' Agency ||--o{
-        
-        ' Agency ||--o{
-          
-          ' Agency ||-- Information
-
-          ' Admin "belong to" ||--|| Customer
-
-          ' Customer  ||--o{
-            
-            ' Agency  ||--o{
-              
-              ' Admin  ||--o{
-                
+TodoList ||--o{ Project: has many
+Project ||--o{ User: has many
+Project ||--o{ Todo: has many
+User ||--o{ Todo: has many
 
 @enduml
