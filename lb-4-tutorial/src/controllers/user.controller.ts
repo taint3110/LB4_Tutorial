@@ -5,8 +5,8 @@ import { get, getJsonSchemaRef, post, param, getModelSchemaRef, requestBody, res
 import { securityId, UserProfile } from '@loopback/security';
 import * as _ from 'lodash';
 import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
-import { User, Todo, TodoList } from '../models';
-import { Credentials, UserRepository, TodoListRepository } from '../repositories';
+import { User, Todo } from '../models';
+import { Credentials, UserRepository } from '../repositories';
 import { validateCredentials } from '../services';
 import { BcryptHasher } from '../services/hash.password';
 import { JWTService } from '../services/jwt-service';
@@ -21,9 +21,6 @@ export class UserController {
   constructor(
     @repository(UserRepository)
     public userRepository : UserRepository,
-
-    @repository(TodoListRepository)
-    public todoListRepository : TodoListRepository,
 
     @inject(PasswordHasherBindings.PASSWORD_HASHER)
     public hasher: BcryptHasher,
@@ -101,30 +98,6 @@ export class UserController {
     currentUser: UserProfile,
   ): Promise<UserProfile> {
     return Promise.resolve(currentUser);
-  }
-
-  @authenticate("jwt")
-  @authorize({ allowedRoles: ['admin'], voters: [basicAuthorization] })
-  @post(adminRoutes.createTodoList, {
-    security: OPERATION_SECURITY_SPEC,
-    responses: {
-      '200': {
-        description: 'Create todoList',
-        content: {
-          schema: getJsonSchemaRef(TodoList)
-        }
-      }
-    },
-  })
-  async createTodoList(
-    @requestBody() todoListData: TodoList,
-    @inject(AuthenticationBindings.CURRENT_USER)
-    currentUser: UserProfile,
-  ) {
-    //await validateCredentials(_.pick(todoListData, ['title']), this.todoListRepository);
-    todoListData.createdBy = currentUser[securityId]
-    const savedTodoList = await this.todoListRepository.create(todoListData);
-    return _.omit(savedTodoList, 'isDeleted');
   }
 
 }

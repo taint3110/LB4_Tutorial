@@ -1,0 +1,39 @@
+@startuml log in user sequence
+
+header LOG IN | USER SEQUENCE
+actor User 
+control server
+database user
+
+opt  User log in
+  User -> server: POST /login with email and password
+  activate server
+      server -> server: validate email and password
+      activate server #DarkBlue
+      activate user
+      alt <font color=red>validate failed</font>
+        server --> User: 401, log in failed
+        deactivate server
+      else <font color=green>validate succeeded</font>
+        server --> user:find user with email
+        alt <font color=red>have error</font>
+          user --> server: error
+          server --> User:500, internal error
+          alt <font color=red>have no user data</font>
+            user --> server: log in rejected
+            server --> User: 404, user not found
+          else <font color=green>have user data</font>
+              user -> server: log in accepted 
+                server -> server: create a JWT with a secret
+                activate server #DarkBlue
+                server --> User: 200, success, return the JWT
+                deactivate server
+        end
+      end
+    end
+  end
+    deactivate user
+    deactivate server
+
+
+@enduml

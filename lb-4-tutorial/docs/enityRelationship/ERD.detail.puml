@@ -1,12 +1,12 @@
 @startuml Todo
 entity Todo {
-  -id: ObjectId <generated>
+  -id: ObjectID <generated>
   --
-  ~projectId: ObjectId
-  ~assignedTo: ObjectId
-  ~createdBy: ObjectId
+  ~projectId: ObjectID
+  ~assignedTo: ObjectID
+  ~createdBy: ObjectID
   --
-  title: string
+  *title: string
   description: string
   priority: "low" |  "medium" | "high" | "highest"
   status: "todo" | "in progress" | "coding done"
@@ -29,7 +29,7 @@ entity Project {
   isDeleted: boolean
 }
 entity User {
-  -id: ObjectId <generated>
+  -id: ObjectID <generated>
   --
   name: string
   *email: string
@@ -42,14 +42,14 @@ entity User {
   isDeleted: boolean
 }
 entity ProjectUser {
-  ~projectId: ObjectId
-  ~userId: ObjectId
+  ~projectId: ObjectID
+  ~userId: ObjectID
   --
   createdAt: Date,
 }
 entity TodoLink {
-  ~parentId: ObjectID
-  ~childId: ObjectID
+  ~parentId: ObjectID 
+  ~todoId: ObjectID
 }
 
 note left of ProjectUser

@@ -1,0 +1,47 @@
+@startuml read todo user sequence
+
+header READ TODO | USER SEQUENCE
+actor User 
+control server
+database user
+
+opt READ: User read todo
+  User -> server: GET /users/readTransaction
+  activate server
+  server -> server: check token
+  activate server #DarkBlue
+  alt <font color=red>token invalid</font>
+    server --> User: 401, unauthorized error
+    deactivate server
+  else <font color=green>token valid</font>
+    server -> server: decrypt token to get profile of user
+    activate server #DarkBlue
+    alt <font color=red>profile is Null</font>
+      server --> User : 401, request failed
+      deactivate server
+      else <font color=green>has profile</font>
+        server -> server: check isUser
+        activate server #DarkBlue
+      alt <font color=red>is not user</font>
+        server --> User: 403, forbidden error
+        deactivate server
+      else <font color=green>is user</font>
+      activate user
+      server -> user: find user with id
+      alt <font color=red>have error</font>
+        user --> server: error
+        server --> User: 500, internal error
+      else <font color=green>found user</font>
+          user --> server: response todos of user
+      else <font color=green>success</font>
+          server --> User: 200, success, response todos
+        end
+      end
+    end
+  end
+  end
+  
+    deactivate server
+
+
+@enduml

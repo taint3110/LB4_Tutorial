@@ -1,0 +1,37 @@
+@startuml read user information user sequence
+
+header READ USER INFORMATION | USER SEQUENCE
+actor User 
+control server
+
+opt READ: User get user information
+  User -> server: GET /users/me
+  activate server
+  server -> server: check token
+  activate server #DarkBlue
+  alt <font color=red>token invalid</font>
+    server --> User: 401, unauthorized error
+    deactivate server
+  else <font color=green>token valid</font>
+    server --> server: decrypt token to get profile of user
+    activate server #DarkBlue
+    alt <font color=red>profile is Null</font>
+      server --> User : 401, request failed
+      deactivate server
+      else <font color=green>has profile</font>
+        server --> server: check isUser
+        activate server #DarkBlue
+      alt <font color=red>is not user</font>
+        server --> User: 403, forbidden error
+        deactivate server
+      else <font color=green>is user</font>
+      server --> User: 200, success, get user information
+      end
+    end
+  end
+  end
+
+    deactivate server
+
+
+@enduml

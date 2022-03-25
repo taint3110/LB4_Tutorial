@@ -1,0 +1,68 @@
+@startuml read todo user sequence
+
+header CREATE TODO LINK| ADMIN SEQUENCE
+actor Admin 
+control server
+database todo
+
+opt CREATE: Admin create todo link
+  activate server
+  Admin -> server: UPDATE /admins/createTodoLink{id1}+{id2}
+  
+  server -> server: check token
+  activate server #DarkBlue
+  alt <font color=red>token invalid</font>
+    server --> Admin: 401, unauthorized error
+    deactivate server
+  else <font color=green>token valid</font>
+    server -> server: decrypt token to get profile of todo
+    activate server #DarkBlue
+    alt <font color=red>profile is Null</font>
+      server --> Admin : 401, request failed
+      deactivate server
+      else <font color=green>has profile</font>
+        server -> server: check isAdmin
+        activate server #DarkBlue
+      alt <font color=red>is not admin</font>
+        server --> Admin: 403, forbidden error
+        deactivate server
+      else <font color=green>is admin</font>
+ 
+        activate todo
+        server -> todo: find todo1 with id1
+        alt <font color=red>have error</font>
+          todo --> server: error
+          server --> Admin: 500, internal error
+          alt <font color=red>todo1 not found</font>
+            todo --> server: request rejected
+            server --> Admin: 404, todo1 not found
+          else <font color=green>found todo1</font>
+            todo --> server: return projectId
+            server -> todo: find todo2 with id2
+              alt <font color=red>todo2 not found</font> 
+                todo --> server: request rejected
+                server --> Admin: 404, todo2 not found
+                else <font color=green>found todo2</font>
+                todo --> server: return projectId of todo2
+                server -> server: check if 2 projectIds are the same
+                  activate server #DarkBlue
+                  alt <font color=red>is not in the same project</font>
+                    server --> Admin: 403, cannot link 2 todos
+                    deactivate server
+                  else <font color=green>is in the same project</font>
+                      server -> todo: update parentId of todo1 into todoId2
+                  else <font color=green>success</font>
+                      server --> Admin: 204, success
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+  end
+  
+    deactivate server
+
+
+@enduml

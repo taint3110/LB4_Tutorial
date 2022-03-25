@@ -22,14 +22,14 @@ export async function basicAuthorization(
     const user = _.pick(authorizationCtx.principals[0], [
       'id',
       'name',
-      'roles',
+      'role',
     ]);
-    currentUser = { [securityId]: user.id, name: user.name, roles: user.roles };
+    currentUser = { [securityId]: user.id, name: user.name, role: user.role };
   } else {
     return AuthorizationDecision.DENY;
   }
 
-  if (!currentUser.roles) {
+  if (!currentUser.role) {
     return AuthorizationDecision.DENY;
   }
 
@@ -38,7 +38,7 @@ export async function basicAuthorization(
   }
 
   let roleIsAllowed = false;
-  for (const role of currentUser.roles) {
+  for (const role of currentUser.role) {
     if (metadata.allowedRoles!.includes(role)) {
       roleIsAllowed = true;
       break;
@@ -50,8 +50,8 @@ export async function basicAuthorization(
   }
 
   if (
-    currentUser.roles.includes('admin') ||
-    currentUser.roles.includes('support')
+    currentUser.role.includes('admin') ||
+    currentUser.role.includes('support')
   ) {
     return AuthorizationDecision.ALLOW;
   }

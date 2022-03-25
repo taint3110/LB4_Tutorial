@@ -1,15 +1,15 @@
 @startuml Application use cases diagram
 skinparam actorStyle awesome
-title ERD
 
 entity Todo{
-  -id: ObjectId <generated>
+  -id: ObjectID <generated>
   --
-  ~projectId: ObjectId
-  ~assignedTo: ObjectId
-  ~createdBy: ObjectId
+  ~projectId: ObjectID
+  ~assignedTo: ObjectID
+  ~createdBy: ObjectID
+  ~parentId: ObjectID
   --
-  title: string
+  *title: string
   description: string
   priority: "low" |  "medium" | "high" | "highest"
   status: "todo" | "in progress" | "coding done"
@@ -21,9 +21,9 @@ entity Todo{
 }
 
 entity Project {
-  -id: ObjectId <generated>
+  -id: ObjectID <generated>
   --
-  ~createdBy: ObjectId
+  ~createdBy: ObjectID
   --
   *title: string,
   description: string,
@@ -34,7 +34,7 @@ entity Project {
 }
 
 entity User {
-  -id: ObjectId <generated>
+  -id: ObjectID <generated>
   --
   name: string
   *email: string
@@ -43,14 +43,17 @@ entity User {
   isActive: boolean
   createdAt: Date
   updatedAt: Date
-  role: "user" | "admin"
   isDeleted: boolean
+  role: "user" | "admin"
 }
 
 entity ProjectUser {
-  ~projectId: ObjectId
-  ~userId: ObjectId
+  -id: ObjectID
   --
+  ~projectId: ObjectID
+  ~userId: ObjectID
+  --
+  projectRole: "developer" | "manager"
   createdAt: Date,
 }
 
@@ -58,6 +61,6 @@ Project ||--o{ Todo
 Project ||--o{ ProjectUser
 User ||--o{ ProjectUser
 User ||--o{ Todo
-Todo ||--|| Todo
+Todo ||--o{ Todo
 
 @enduml

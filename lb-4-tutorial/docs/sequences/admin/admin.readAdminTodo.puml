@@ -1,0 +1,47 @@
+@startuml read todo user sequence
+
+header READ TODO OF USER | ADMIN SEQUENCE
+actor Admin 
+control server
+database user
+
+opt READ: Admin read admin todo
+  Admin -> server: GET /admins/readAdminTodo
+  activate server
+  server -> server: check token
+  activate server #DarkBlue
+  alt <font color=red>token invalid</font>
+    server --> Admin: 401, unauthorized error
+    deactivate server
+  else <font color=green>token valid</font>
+    server -> server: decrypt token to get profile of user
+    activate server #DarkBlue
+    alt <font color=red>profile is Null</font>
+      server --> Admin : 401, request failed
+      deactivate server
+      else <font color=green>has profile</font>
+        server -> server: check isAdmin
+        activate server #DarkBlue
+      alt <font color=red>is not admin</font>
+        server --> Admin: 403, forbidden error
+        deactivate server
+      else <font color=green>is admin</font>
+      activate user
+      server -> user: find admin with id
+      alt <font color=red>have error</font>
+        user --> server: error
+        server --> Admin: 500, internal error
+      else <font color=green>found admin</font>
+          user --> server: response todos of admin
+      else <font color=green>success</font>
+          server --> Admin: 200, success, response todos data
+        end
+      end
+    end
+  end
+  end
+  
+    deactivate server
+
+
+@enduml

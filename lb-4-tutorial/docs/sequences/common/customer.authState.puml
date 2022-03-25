@@ -1,0 +1,43 @@
+@startuml auth state user sequence
+
+header auth state USER SEQUENCE 
+actor User 
+control server
+database user
+
+opt  Custommer log in
+  User -> server: POST /login with email and password
+  activate server
+      server -> user: find user with email
+      activate user
+      alt <font color=red>have error</font>
+        user --> server: error
+        server --> User: 500, internal error
+      else <font color=red>have no user data</font>
+        user --> server: fail
+        server --> User: 404, user not found
+      else <font color=green>have user data</font>
+          server -> user: log in
+          alt <font color=red>have error</font>
+            user --> server: error
+            server --> User: 500, internal error
+          else <font color=green>success</font>
+            user --> server: success
+            server --> server: create a JWT with a secret
+            activate server #DarkBlue
+            server --> User: 200, success, return the JWT
+            deactivate server
+            User --> User: set JWT to local storage
+            alt <font color=red>JWT expire</font>
+            User --> server: kick to /login
+            else <font color=green>JWT not expire</font>
+            server --> User: 204, stay auth
+            end
+          end
+      end
+    end
+    deactivate user
+    deactivate server
+
+
+@enduml

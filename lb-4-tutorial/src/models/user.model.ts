@@ -1,6 +1,6 @@
 import {Entity, model, property, hasMany} from '@loopback/repository';
-import {Todo} from './todo.model';
-
+import {Todo, TodoWithRelations} from './todo.model';
+import { RoleEnum } from './enum';
 @model()
 export class User extends Entity {
   @property({
@@ -12,7 +12,7 @@ export class User extends Entity {
 
   @property({
     type: 'string',
-    required: true,
+    required: false,
   })
   name: string;
 
@@ -47,11 +47,12 @@ export class User extends Entity {
   updatedAt?: Date;
 
   @property({
-    type: 'array',
-    itemType: 'string',
-    default: ["user"],
+    type: 'string',
+    jsonSchema: {
+      enum: Object.values(RoleEnum)
+    }
   })
-  roles?: string[];
+  role?: RoleEnum;
 
   @property({
     type: 'boolean',
@@ -65,11 +66,6 @@ export class User extends Entity {
   })
   isActive?: boolean;
 
-  @property({
-    type: 'string',
-  })
-  projectId?: string;
-
   @hasMany(() => Todo)
   todos: Todo[];
 
@@ -79,7 +75,7 @@ export class User extends Entity {
 }
 
 export interface UserRelations {
-  // describe navigational properties here
+ todos: TodoWithRelations[];
 }
 
 export type UserWithRelations = User & UserRelations;

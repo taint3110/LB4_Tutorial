@@ -1,22 +1,16 @@
-import {inject, Getter} from '@loopback/core';
-import {DefaultCrudRepository, repository, BelongsToAccessor} from '@loopback/repository';
+import {inject} from '@loopback/core';
+import {DefaultCrudRepository} from '@loopback/repository';
 import {DatabaseDataSource} from '../datasources';
-import {Todo, TodoRelations, TodoList} from '../models';
-import {TodoListRepository} from './todo-list.repository';
+import {Todo, TodoRelations} from '../models';
 
 export class TodoRepository extends DefaultCrudRepository<
   Todo,
   typeof Todo.prototype.id,
   TodoRelations
 > {
-
-  public readonly todoList: BelongsToAccessor<TodoList, typeof Todo.prototype.id>;
-
   constructor(
-    @inject('datasources.database') dataSource: DatabaseDataSource, @repository.getter('TodoListRepository') protected todoListRepositoryGetter: Getter<TodoListRepository>,
+    @inject('datasources.database') dataSource: DatabaseDataSource,
   ) {
     super(Todo, dataSource);
-    this.todoList = this.createBelongsToAccessorFor('todoList', todoListRepositoryGetter,);
-    this.registerInclusionResolver('todoList', this.todoList.inclusionResolver);
   }
 }

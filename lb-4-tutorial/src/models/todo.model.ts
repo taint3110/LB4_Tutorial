@@ -1,6 +1,7 @@
+import { UserWithRelations } from './user.model';
 import {Entity, model, property, belongsTo} from '@loopback/repository';
-import {TodoList} from './todo-list.model';
-
+import { ProjectWithRelations } from './project.model';
+import { PriorityEnum, StatusEnum } from './enum';
 @model()
 export class Todo extends Entity {
   @property({
@@ -22,16 +23,20 @@ export class Todo extends Entity {
   description?: string;
 
   @property({
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    jsonSchema: {
+      enum: Object.values(PriorityEnum)
+    }
   })
-  isInprogress?: boolean;
+  priority?: PriorityEnum;
 
   @property({
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    jsonSchema: {
+      enum: Object.values(StatusEnum)
+    }
   })
-  isCodingDone?: boolean;
+  status?: StatusEnum;
 
   @property({
     type: 'boolean',
@@ -78,7 +83,8 @@ export class Todo extends Entity {
 }
 
 export interface TodoRelations {
-  // describe navigational properties here
+  project?: ProjectWithRelations;
+  user?: UserWithRelations;
 }
 
 export type TodoWithRelations = Todo & TodoRelations;

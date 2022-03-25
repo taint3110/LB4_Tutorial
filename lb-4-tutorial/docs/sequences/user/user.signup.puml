@@ -1,0 +1,43 @@
+@startuml signup user sequence
+
+header SIGN UP USER SEQUENCE
+actor User 
+control server
+database user
+
+opt CREATE: User sign up
+  User -> server: POST /signup with user data
+  activate server
+    server -> server: validate user data
+    activate server #DarkBlue
+      alt <font color=red>validate failed</font>
+        server --> User: 401, log in failed
+        deactivate server
+      else <font color=green>validate succeeded</font>
+        activate user
+        server --> user:find user with email
+      alt <font color=red>have error</font>
+        user --> server: error
+        server --> User: 500, internal error
+        alt <font color=red>have user data</font>
+        user --> server: user data
+        server --> User: 409, existed user
+      else <font color=green>have no user data</font>
+          server -> user: create new user
+          alt <font color=red>have error</font>
+            user --> server: error
+            server --> User: 500, internal error
+          else <font color=green>success</font>
+            user --> server: sign up success
+            server --> User: 204, success, redirect to log in
+          end
+        end
+      end
+    end
+  end
+    deactivate user
+    deactivate server
+
+
+
+@enduml

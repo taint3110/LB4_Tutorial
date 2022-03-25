@@ -1,5 +1,4 @@
 import {Entity, model, property, belongsTo, hasMany} from '@loopback/repository';
-import {TodoList} from './todo-list.model';
 import {Todo} from './todo.model';
 import {User} from './user.model';
 
@@ -25,27 +24,8 @@ export class Project extends Entity {
 
   @property({
     type: 'boolean',
-    default: false,
   })
-  isInprogress?: boolean;
-
-  @property({
-    type: 'boolean',
-    default: false,
-  })
-  isCodingDone?: boolean;
-
-  @property({
-    type: 'boolean',
-    default: false,
-  })
-  isFixing?: boolean;
-
-  @property({
-    type: 'boolean',
-    default: false,
-  })
-  isDone?: boolean;
+  isActive?: boolean;
 
   @property({
     type: 'date',
@@ -64,9 +44,6 @@ export class Project extends Entity {
   })
   isDeleted?: boolean;
 
-  @belongsTo(() => TodoList)
-  todoListId: string;
-
   @hasMany(() => Todo)
   todos: Todo[];
 
@@ -79,7 +56,7 @@ export class Project extends Entity {
 }
 
 export interface ProjectRelations {
-  // describe navigational properties here
+  
 }
 
 export type ProjectWithRelations = Project & ProjectRelations;
