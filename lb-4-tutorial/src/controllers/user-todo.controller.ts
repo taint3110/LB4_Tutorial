@@ -1,29 +1,37 @@
-import {
-  Count,
-  CountSchema,
-  Filter,
-  repository,
-  Where,
-} from '@loopback/repository';
-import {
-  del,
-  get,
-  getModelSchemaRef,
-  getWhereSchemaFor,
-  param,
-  patch,
-  post,
-  requestBody,
-} from '@loopback/rest';
-import {
-  User,
-  Todo,
-} from '../models';
-import {UserRepository} from '../repositories';
+import { Filter, FilterExcludingWhere, repository, Where } from '@loopback/repository';
+import { authenticate, AuthenticationBindings } from '@loopback/authentication';
+import { inject } from '@loopback/core';
+import { get, getJsonSchemaRef, post, param, getModelSchemaRef, requestBody, response } from '@loopback/rest';
+import { securityId, UserProfile } from '@loopback/security';
+import * as _ from 'lodash';
+import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
+import { User, Todo } from '../models';
+import { Credentials, TodoRepository, UserRepository } from '../repositories';
+import { validateCredentials, validateTodoCredentials } from '../services';
+import { BcryptHasher } from '../services/hash.password';
+import { JWTService } from '../services/jwt-service';
+import { MyUserService } from '../services/user-service';
+import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
+import { userRoutes } from './routes.helper'
+import { authorize } from '@loopback/authorization';
+import { basicAuthorization } from '../services/basic.authorizor';
 
 export class UserTodoController {
   constructor(
-    @repository(UserRepository) protected userRepository: UserRepository,
+    @repository(UserRepository)
+    public userRepository : UserRepository,
+
+    @repository(TodoRepository)
+    public todoRepository : TodoRepository,
+
+    @inject(PasswordHasherBindings.PASSWORD_HASHER)
+    public hasher: BcryptHasher,
+
+    @inject(UserServiceBindings.USER_SERVICE)
+    public userService: MyUserService,
+
+    @inject(TokenServiceBindings.TOKEN_SERVICE)
+    public jwtService: JWTService,
   ) { }
 
   @get('/users/{id}/todos', {
@@ -70,41 +78,4 @@ export class UserTodoController {
     return this.userRepository.todos(id).create(todo);
   }
 
-  @patch('/users/{id}/todos', {
-    responses: {
-      '200': {
-        description: 'User.Todo PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async patch(
-    @param.path.string('id') id: string,
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Todo, {partial: true}),
-        },
-      },
-    })
-    todo: Partial<Todo>,
-    @param.query.object('where', getWhereSchemaFor(Todo)) where?: Where<Todo>,
-  ): Promise<Count> {
-    return this.userRepository.todos(id).patch(todo, where);
-  }
-
-  @del('/users/{id}/todos', {
-    responses: {
-      '200': {
-        description: 'User.Todo DELETE success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async delete(
-    @param.path.string('id') id: string,
-    @param.query.object('where', getWhereSchemaFor(Todo)) where?: Where<Todo>,
-  ): Promise<Count> {
-    return this.userRepository.todos(id).delete(where);
-  }
 }

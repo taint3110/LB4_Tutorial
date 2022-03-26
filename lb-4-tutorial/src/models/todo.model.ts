@@ -1,7 +1,9 @@
-import { UserWithRelations } from './user.model';
+import { UserWithRelations, User} from './user.model';
 import {Entity, model, property, belongsTo} from '@loopback/repository';
 import { ProjectWithRelations } from './project.model';
 import { PriorityEnum, StatusEnum } from './enum';
+
+
 @model()
 export class Todo extends Entity {
   @property({
@@ -26,7 +28,8 @@ export class Todo extends Entity {
     type: 'string',
     jsonSchema: {
       enum: Object.values(PriorityEnum)
-    }
+    },
+    default: PriorityEnum.LOW
   })
   priority?: PriorityEnum;
 
@@ -34,7 +37,8 @@ export class Todo extends Entity {
     type: 'string',
     jsonSchema: {
       enum: Object.values(StatusEnum)
-    }
+    },
+    default: StatusEnum.TODO
   })
   status?: StatusEnum;
 
@@ -64,6 +68,7 @@ export class Todo extends Entity {
 
   @property({
     type: 'boolean',
+    default: false
   })
   isDeleted?: boolean;
 
@@ -72,10 +77,11 @@ export class Todo extends Entity {
   })
   projectId?: string;
 
-  @property({
-    type: 'string',
-  })
-  userId?: string;
+  @belongsTo(() => User)
+  userId: string;
+
+  @belongsTo(() => Todo, {name: 'parent'})
+  parentId: string;
 
   constructor(data?: Partial<Todo>) {
     super(data);
@@ -84,7 +90,8 @@ export class Todo extends Entity {
 
 export interface TodoRelations {
   project?: ProjectWithRelations;
-  user?: UserWithRelations;
+  assignedTo?: UserWithRelations;
+  parent?: TodoWithRelations;
 }
 
 export type TodoWithRelations = Todo & TodoRelations;

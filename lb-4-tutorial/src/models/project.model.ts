@@ -1,6 +1,7 @@
 import {Entity, model, property, belongsTo, hasMany} from '@loopback/repository';
-import {Todo} from './todo.model';
+import {Todo, TodoWithRelations} from './todo.model';
 import {User} from './user.model';
+import {ProjectUser, ProjectUserWithRelations} from './project-user.model';
 
 @model()
 export class Project extends Entity {
@@ -41,14 +42,15 @@ export class Project extends Entity {
 
   @property({
     type: 'boolean',
+    default: false,
   })
   isDeleted?: boolean;
 
   @hasMany(() => Todo)
   todos: Todo[];
 
-  @hasMany(() => User)
-  users: User[];
+  @hasMany(() => ProjectUser)
+  projectUsers: ProjectUser[];
 
   constructor(data?: Partial<Project>) {
     super(data);
@@ -56,7 +58,8 @@ export class Project extends Entity {
 }
 
 export interface ProjectRelations {
-  
+  projectUsers?: ProjectUserWithRelations[]
+  todos?: TodoWithRelations[]
 }
 
 export type ProjectWithRelations = Project & ProjectRelations;

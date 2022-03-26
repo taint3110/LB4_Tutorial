@@ -5,8 +5,8 @@ export enum RoleEnum {
 
 export enum StatusEnum {
   TODO = 'todo',
-  INPROGRESS = 'in progress',
-  CODINGDONE = 'coding done',
+  IN_PROGRESS = 'in progress',
+  CODING_DONE = 'coding done',
 }
 
 export enum PriorityEnum {

@@ -20,7 +20,7 @@ opt READ: Admin read user todo
       server --> Admin : 401, request failed
       deactivate server
       else <font color=green>has profile</font>
-        server --> server: check isAdmin
+        server -> server: check isAdmin
         activate server #DarkBlue
       alt <font color=red>is not admin</font>
         server --> Admin: 403, forbidden error
