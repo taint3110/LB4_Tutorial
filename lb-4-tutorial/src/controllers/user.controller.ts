@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
 import { User, Task, Project } from '../models';
 import { Credentials, TaskRepository, UserRepository, ProjectRepository } from '../repositories';
-import { validateCredentials, validateTaskCredentials, validateProjectCredentials } from '../services';
+import { validateCredentials, validateTaskData, validateProjectData } from '../services';
 import { BcryptHasher } from '../services/hash.password';
 import { JWTService } from '../services/jwt-service';
 import { MyUserService } from '../services/user-service';

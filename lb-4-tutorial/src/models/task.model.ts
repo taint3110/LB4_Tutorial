@@ -1,8 +1,7 @@
 import { UserWithRelations, User} from './user.model';
-import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {Entity, model, property, belongsTo, hasOne, hasMany} from '@loopback/repository';
 import { ProjectWithRelations } from './project.model';
 import { PriorityEnum, StatusEnum } from './enum';
-
 
 @model()
 export class Task extends Entity {
@@ -92,8 +91,11 @@ export class Task extends Entity {
   @belongsTo(() => User)
   userId: string;
 
-  @belongsTo(() => Task, {name: 'parent'})
+  @belongsTo(() => Task)
   parentId: string;
+
+  @hasMany(() => Task, {keyTo: 'parentId'})
+  tasks: Task[];
 
   constructor(data?: Partial<Task>) {
     super(data);
@@ -102,8 +104,9 @@ export class Task extends Entity {
 
 export interface TaskRelations {
   project?: ProjectWithRelations;
-  assignedTo?: UserWithRelations;
-  parent?: TaskWithRelations;
+  user?: UserWithRelations;
+  parent?: TaskWithRelations
+  tasks?: TaskWithRelations[]
 }
 
 export type TaskWithRelations = Task & TaskRelations;

@@ -5,8 +5,11 @@ import {Project, ProjectRelations, Task, User, ProjectUser} from '../models';
 import {TaskRepository} from './task.repository';
 import {UserRepository} from './user.repository';
 import {ProjectUserRepository} from './project-user.repository';
-export type ProjectCredentials = {
+export type ProjectData = {
   title: string,
+}
+export type ProjectId = {
+  id: string,
 }
 export class ProjectRepository extends DefaultCrudRepository<
   Project,

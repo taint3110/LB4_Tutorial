@@ -18,7 +18,7 @@ export class ProjectUser extends Entity {
       enum: Object.values(RoleEnum)
     },
     required: true,
-    default: "user"
+    default: RoleEnum.USER
   })
   role?: RoleEnum;
 

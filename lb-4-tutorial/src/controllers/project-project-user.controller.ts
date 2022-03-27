@@ -6,8 +6,8 @@ import { securityId, UserProfile } from '@loopback/security';
 import * as _ from 'lodash';
 import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
 import { User, Task, Project, ProjectUser } from '../models';
-import { Credentials, TaskRepository, UserRepository, ProjectRepository, ProjectUserRepository, ProjectUserCredentials } from '../repositories';
-import { validateProjectUserCredentials, validateTaskCredentials, validateProjectCredentials } from '../services';
+import { Credentials, TaskRepository, UserRepository, ProjectRepository, ProjectUserRepository, ProjectUserData } from '../repositories';
+import { validateProjectUserData, validateTaskData, validateProjectData } from '../services';
 import { BcryptHasher } from '../services/hash.password';
 import { JWTService } from '../services/jwt-service';
 import { MyUserService } from '../services/user-service';
@@ -66,9 +66,9 @@ export class ProjectProjectUserController {
   })
   async createProjectUser(
     @param.path.string('id') id: typeof Project.prototype.id,
-    @requestBody() projectUser: ProjectUserCredentials
+    @requestBody() projectUser: ProjectUserData
   ): Promise<ProjectUser> {
-    await validateProjectUserCredentials(_.pick(projectUser, ['userId', 'projectId']), this.projectUserRepository, this.projectRepository);
+    await validateProjectUserData(_.pick(projectUser, ['userId', 'projectId']), this.projectUserRepository, this.projectRepository);
     return this.projectRepository.projectUsers(id).create(projectUser);
   }
 

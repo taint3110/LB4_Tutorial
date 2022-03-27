@@ -1,7 +1,7 @@
 import { UserRepository, TaskRepository, ProjectRepository, ProjectUserRepository } from './../repositories'
 import { HttpErrors } from '@loopback/rest';
 import * as isEmail from 'isemail';
-import { Credentials, TaskCredentials, ProjectCredentials, ProjectUserCredentials } from '../repositories/index';
+import { Credentials, TaskData, ProjectData, ProjectUserData, TaskLinkData } from '../repositories/index';
 import { isBuffer } from 'lodash';
 export async function validateCredentials(credentials: Credentials, userRepository: UserRepository) {
   if (!isEmail.validate(credentials.email)) {
@@ -23,10 +23,10 @@ export async function validateCredentials(credentials: Credentials, userReposito
   }
 }
 
-export async function validateTaskCredentials(credentials: TaskCredentials, taskRepository: TaskRepository) {
+export async function validateTaskData(taskData: TaskData, taskRepository: TaskRepository) {
   const foundTask = await taskRepository.findOne({
     where: {
-      title: credentials.title
+      title: taskData.title
     }
   });
   if (foundTask !== null) {
@@ -34,10 +34,10 @@ export async function validateTaskCredentials(credentials: TaskCredentials, task
   }
 }
 
-export async function validateProjectCredentials(projectCredentials: ProjectCredentials, projectRepository: ProjectRepository) {
+export async function validateProjectData(projectData: ProjectData, projectRepository: ProjectRepository) {
   const foundProject = await projectRepository.findOne({
     where: {
-      title: projectCredentials.title
+      title: projectData.title
     }
   });
   if (foundProject !== null) {
@@ -45,16 +45,16 @@ export async function validateProjectCredentials(projectCredentials: ProjectCred
   }
 }
 
-export async function validateProjectUserCredentials(projectUserCredentials: ProjectUserCredentials, projectUserRepository: ProjectUserRepository, projectRepository: ProjectRepository) {
+export async function validateProjectUserData(projectUserData: ProjectUserData, projectUserRepository: ProjectUserRepository, projectRepository: ProjectRepository) {
   const foundProjectUser = await projectUserRepository.findOne({
     where: {
-      userId: projectUserCredentials.userId,
-      projectId: projectUserCredentials.projectId,
+      userId: projectUserData.userId,
+      projectId: projectUserData.projectId,
     }
   });
   const foundProject = await projectRepository.findOne({
     where: {
-      id: projectUserCredentials.projectId
+      id: projectUserData.projectId
     }
   })
   if (foundProjectUser !== null) {
@@ -62,5 +62,17 @@ export async function validateProjectUserCredentials(projectUserCredentials: Pro
   }
   if (foundProject == null){
     throw new HttpErrors.UnprocessableEntity('Project not found to create projectUser');
+  }
+}
+
+export async function validateTaskLinkData(taskLinkData: TaskLinkData, taskRepository: TaskRepository) {
+  const foundTask = await taskRepository.findById(taskLinkData.taskId);
+  const foundParentTask = await taskRepository.findById(taskLinkData.parentId)
+  if (!foundTask || !foundParentTask) {
+    throw new HttpErrors[404]('One of two task does not exist');
+  }
+  const isSameProject: boolean = String(foundTask?.projectId) === String(foundParentTask?.projectId)
+  if (!isSameProject){
+    throw new HttpErrors.Forbidden('Can only link two tasks in the same project');
   }
 }

@@ -7,12 +7,12 @@ import * as _ from 'lodash';
 import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
 import { User, Task, Project } from '../models';
 import { Credentials, TaskRepository, UserRepository, ProjectRepository } from '../repositories';
-import { validateCredentials, validateTaskCredentials, validateProjectCredentials } from '../services';
+import { validateCredentials, validateTaskData, validateProjectData } from '../services';
 import { BcryptHasher } from '../services/hash.password';
 import { JWTService } from '../services/jwt-service';
 import { MyUserService } from '../services/user-service';
 import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
-import { userRoutes } from './routes.helper'
+import { projectRoutes, userRoutes } from './routes.helper'
 import { authorize } from '@loopback/authorization';
 import { basicAuthorization } from '../services/basic.authorizor';
 @authenticate("jwt")
@@ -31,7 +31,7 @@ export class ProjectController {
   ) {}
 
   @authorize({ allowedRoles: ['admin'], voters: [basicAuthorization] })
-  @post(userRoutes.createProject, {
+  @post(projectRoutes.createProject, {
     security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
@@ -46,7 +46,7 @@ export class ProjectController {
   })
   async createProject(
     @requestBody() projectData: Project) {
-    await validateProjectCredentials(_.pick(projectData, ['title']), this.projectRepository);
+    await validateProjectData(_.pick(projectData, ['title']), this.projectRepository);
     const savedProject = await this.projectRepository.create(projectData)
     return savedProject;
   }

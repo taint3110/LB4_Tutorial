@@ -33,6 +33,6 @@ export class TaskUserController {
   async getUser(
     @param.path.string('id') id: typeof Task.prototype.id,
   ): Promise<User> {
-    return this.taskRepository.user(id);
+    return this.taskRepository.user(id)
   }
 }

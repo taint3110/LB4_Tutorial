@@ -4,7 +4,7 @@ import {DatabaseDataSource} from '../datasources';
 import {ProjectUser, ProjectUserRelations, Project, User} from '../models';
 import {ProjectRepository} from './project.repository';
 import {UserRepository} from './user.repository';
-export type ProjectUserCredentials = {
+export type ProjectUserData = {
   userId: string,
   projectId: string
 }
