@@ -67,6 +67,12 @@ export class Task extends Entity {
   updatedAt?: Date;
 
   @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  dueDate?: string;
+
+  @property({
     type: 'boolean',
     default: false
   })

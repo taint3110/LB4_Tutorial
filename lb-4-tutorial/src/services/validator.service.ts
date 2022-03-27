@@ -2,6 +2,7 @@ import { UserRepository, TaskRepository, ProjectRepository, ProjectUserRepositor
 import { HttpErrors } from '@loopback/rest';
 import * as isEmail from 'isemail';
 import { Credentials, TaskCredentials, ProjectCredentials, ProjectUserCredentials } from '../repositories/index';
+import { isBuffer } from 'lodash';
 export async function validateCredentials(credentials: Credentials, userRepository: UserRepository) {
   if (!isEmail.validate(credentials.email)) {
     throw new HttpErrors.UnprocessableEntity('invalid Email');
@@ -44,14 +45,22 @@ export async function validateProjectCredentials(projectCredentials: ProjectCred
   }
 }
 
-export async function validateProjectUserCredentials(projectUserCredentials: ProjectUserCredentials, projectUserRepository: ProjectUserRepository) {
+export async function validateProjectUserCredentials(projectUserCredentials: ProjectUserCredentials, projectUserRepository: ProjectUserRepository, projectRepository: ProjectRepository) {
   const foundProjectUser = await projectUserRepository.findOne({
     where: {
       userId: projectUserCredentials.userId,
       projectId: projectUserCredentials.projectId,
     }
   });
+  const foundProject = await projectRepository.findOne({
+    where: {
+      id: projectUserCredentials.projectId
+    }
+  })
   if (foundProjectUser !== null) {
     throw new HttpErrors.UnprocessableEntity('User is already on this project');
+  }
+  if (foundProject == null){
+    throw new HttpErrors.UnprocessableEntity('Project not found to create projectUser');
   }
 }

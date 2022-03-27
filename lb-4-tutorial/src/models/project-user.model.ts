@@ -17,7 +17,8 @@ export class ProjectUser extends Entity {
     jsonSchema: {
       enum: Object.values(RoleEnum)
     },
-    required: true
+    required: true,
+    default: "user"
   })
   role?: RoleEnum;
 

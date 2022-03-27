@@ -15,6 +15,8 @@ import {BcryptHasher} from './services/hash.password';
 import {JWTService} from './services/jwt-service';
 import {MyUserService} from './services/user-service';
 import dotenv from 'dotenv';
+import {CronComponent} from '@loopback/cron';
+import * as CronJobs from './cronJob/index'
 dotenv.config();
 export {ApplicationConfig};
 export class AuthApplication extends BootMixin(
@@ -49,6 +51,13 @@ export class AuthApplication extends BootMixin(
         nested: true,
       },
     };
+    Object.entries(CronJobs).forEach(([_key, value]) => {
+      const cronJob = value;
+      this.add(cronJob);
+    });
+
+    this.component(CronComponent);
+
   }
   setupBinding(): void {
     this.bind(PasswordHasherBindings.PASSWORD_HASHER).toClass(BcryptHasher);

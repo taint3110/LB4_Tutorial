@@ -48,24 +48,6 @@ export class TaskController {
     return this.taskRepository.create(task);
   }
 
-  @get(taskRoutes.getTasksInProject)
-  @response(200, {
-    description: 'Array of Task model instances',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'array',
-          items: getModelSchemaRef(Task, {includeRelations: true}),
-        },
-      },
-    },
-  })
-  async find(
-    @param.filter(Task) filter?: Filter<Task>,
-  ): Promise<Task[]> {
-    return this.taskRepository.find(filter);
-  }
-
   @get('/tasks/{id}')
   @response(200, {
     description: 'Task model instance',

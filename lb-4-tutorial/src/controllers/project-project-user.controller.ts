@@ -68,7 +68,7 @@ export class ProjectProjectUserController {
     @param.path.string('id') id: typeof Project.prototype.id,
     @requestBody() projectUser: ProjectUserCredentials
   ): Promise<ProjectUser> {
-    await validateProjectUserCredentials(_.pick(projectUser, ['userId', 'projectId']), this.projectUserRepository);
+    await validateProjectUserCredentials(_.pick(projectUser, ['userId', 'projectId']), this.projectUserRepository, this.projectRepository);
     return this.projectRepository.projectUsers(id).create(projectUser);
   }
 
