@@ -16,10 +16,10 @@ export class ProjectUser extends Entity {
     type: 'string',
     jsonSchema: {
       enum: Object.values(RoleEnum)
-    }
+    },
+    required: true
   })
   role?: RoleEnum;
-
 
   @property({
     type: 'date',

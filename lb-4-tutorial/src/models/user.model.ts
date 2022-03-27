@@ -1,5 +1,5 @@
 import {Entity, model, property, hasMany} from '@loopback/repository';
-import {Todo, TodoWithRelations} from './todo.model';
+import {Task, TaskWithRelations} from './task.model';
 import { RoleEnum } from './enum';
 import {ProjectUser, ProjectUserWithRelations} from './project-user.model';
 
@@ -60,8 +60,16 @@ export class User extends Entity {
   })
   isActive?: boolean;
 
-  @hasMany(() => Todo, {keyTo: 'assignedTo'})
-  todos: Todo[];
+  @property({
+    type: 'string',
+    jsonSchema: {
+      enum: Object.values(RoleEnum)
+    }
+  })
+  role?: RoleEnum;
+
+  @hasMany(() => Task, {keyTo: 'assignedTo'})
+  tasks: Task[];
 
   @hasMany(() => ProjectUser)
   projectUsers: ProjectUser[];
@@ -72,7 +80,7 @@ export class User extends Entity {
 }
 
 export interface UserRelations {
- todos: TodoWithRelations[];
+ tasks: TaskWithRelations[];
  projectUsers: ProjectUserWithRelations[]
 }
 

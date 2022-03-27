@@ -14,6 +14,8 @@ import {MySequence} from './sequence';
 import {BcryptHasher} from './services/hash.password';
 import {JWTService} from './services/jwt-service';
 import {MyUserService} from './services/user-service';
+import dotenv from 'dotenv';
+dotenv.config();
 export {ApplicationConfig};
 export class AuthApplication extends BootMixin(
   ServiceMixin(RepositoryMixin(RestApplication)),
@@ -22,22 +24,16 @@ export class AuthApplication extends BootMixin(
 
     super(options);
 
-    // setup binding
     this.setupBinding();
 
-    // Add security spec
     this.addSecuritySpec();
 
     this.component(AuthenticationComponent);
     registerAuthenticationStrategy(this, JWTStrategy)
 
-    // Set up the custom sequence
     this.sequence(MySequence);
 
-    // Set up default home page
     this.static('/', path.join(__dirname, '../public'));
-
-    // Customize @loopback/rest-explorer configuration here
     this.configure(RestExplorerBindings.COMPONENT).to({
       path: '/explorer',
     });

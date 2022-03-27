@@ -1,5 +1,5 @@
 import {Entity, model, property, belongsTo, hasMany} from '@loopback/repository';
-import {Todo, TodoWithRelations} from './todo.model';
+import {Task, TaskWithRelations} from './task.model';
 import {User} from './user.model';
 import {ProjectUser, ProjectUserWithRelations} from './project-user.model';
 
@@ -46,8 +46,8 @@ export class Project extends Entity {
   })
   isDeleted?: boolean;
 
-  @hasMany(() => Todo)
-  todos: Todo[];
+  @hasMany(() => Task)
+  tasks: Task[];
 
   @hasMany(() => ProjectUser)
   projectUsers: ProjectUser[];
@@ -59,7 +59,7 @@ export class Project extends Entity {
 
 export interface ProjectRelations {
   projectUsers?: ProjectUserWithRelations[]
-  todos?: TodoWithRelations[]
+  tasks?: TaskWithRelations[]
 }
 
 export type ProjectWithRelations = Project & ProjectRelations;

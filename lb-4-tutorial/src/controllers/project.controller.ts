@@ -1,61 +1,54 @@
-import {
-  Count,
-  CountSchema,
-  Filter,
-  FilterExcludingWhere,
-  repository,
-  Where,
-} from '@loopback/repository';
-import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
-  response,
-} from '@loopback/rest';
-import {Project} from '../models';
-import {ProjectRepository} from '../repositories';
-
+import { Filter, FilterExcludingWhere, repository, Where } from '@loopback/repository';
+import { authenticate, AuthenticationBindings } from '@loopback/authentication';
+import { inject } from '@loopback/core';
+import { get, getJsonSchemaRef, post, param, getModelSchemaRef, requestBody, response, patch, put, del } from '@loopback/rest';
+import { securityId, UserProfile } from '@loopback/security';
+import * as _ from 'lodash';
+import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
+import { User, Task, Project } from '../models';
+import { Credentials, TaskRepository, UserRepository, ProjectRepository } from '../repositories';
+import { validateCredentials, validateTaskCredentials, validateProjectCredentials } from '../services';
+import { BcryptHasher } from '../services/hash.password';
+import { JWTService } from '../services/jwt-service';
+import { MyUserService } from '../services/user-service';
+import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
+import { userRoutes } from './routes.helper'
+import { authorize } from '@loopback/authorization';
+import { basicAuthorization } from '../services/basic.authorizor';
+@authenticate("jwt")
 export class ProjectController {
   constructor(
     @repository(ProjectRepository)
     public projectRepository : ProjectRepository,
+    @repository(UserRepository)
+    public userRepository : UserRepository,
+    @repository(TaskRepository)
+    public taskRepository : TaskRepository,
+    @inject(UserServiceBindings.USER_SERVICE)
+    public userService: MyUserService,
+    @inject(TokenServiceBindings.TOKEN_SERVICE)
+    public jwtService: JWTService,
   ) {}
 
-  @post('/projects')
-  @response(200, {
-    description: 'Project model instance',
-    content: {'application/json': {schema: getModelSchemaRef(Project)}},
-  })
-  async create(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Project, {
-            title: 'NewProject',
-            exclude: ['id'],
-          }),
+  @authorize({ allowedRoles: ['admin'], voters: [basicAuthorization] })
+  @post(userRoutes.createProject, {
+    security: OPERATION_SECURITY_SPEC,
+    responses: {
+      '200': {
+        description: 'Admin create project',
+        content: {
+          'application/json': {
+            schema: getJsonSchemaRef(Project),
+          },
         },
       },
-    })
-    project: Omit<Project, 'id'>,
-  ): Promise<Project> {
-    return this.projectRepository.create(project);
-  }
-
-  @get('/projects/count')
-  @response(200, {
-    description: 'Project model count',
-    content: {'application/json': {schema: CountSchema}},
+    },
   })
-  async count(
-    @param.where(Project) where?: Where<Project>,
-  ): Promise<Count> {
-    return this.projectRepository.count(where);
+  async createProject(
+    @requestBody() projectData: Project) {
+    await validateProjectCredentials(_.pick(projectData, ['title']), this.projectRepository);
+    const savedProject = await this.projectRepository.create(projectData)
+    return savedProject;
   }
 
   @get('/projects')
@@ -76,24 +69,6 @@ export class ProjectController {
     return this.projectRepository.find(filter);
   }
 
-  @patch('/projects')
-  @response(200, {
-    description: 'Project PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Project, {partial: true}),
-        },
-      },
-    })
-    project: Project,
-    @param.where(Project) where?: Where<Project>,
-  ): Promise<Count> {
-    return this.projectRepository.updateAll(project, where);
-  }
 
   @get('/projects/{id}')
   @response(200, {

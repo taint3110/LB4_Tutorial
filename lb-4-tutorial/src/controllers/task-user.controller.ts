@@ -7,21 +7,21 @@ import {
   getModelSchemaRef,
 } from '@loopback/rest';
 import {
-  Todo,
+  Task,
   User,
 } from '../models';
-import {TodoRepository} from '../repositories';
+import {TaskRepository} from '../repositories';
 
-export class TodoUserController {
+export class TaskUserController {
   constructor(
-    @repository(TodoRepository)
-    public todoRepository: TodoRepository,
+    @repository(TaskRepository)
+    public taskRepository: TaskRepository,
   ) { }
 
-  @get('/todos/{id}/user', {
+  @get('/tasks/{id}/user', {
     responses: {
       '200': {
-        description: 'User belonging to Todo',
+        description: 'User belonging to Task',
         content: {
           'application/json': {
             schema: {type: 'array', items: getModelSchemaRef(User)},
@@ -31,8 +31,8 @@ export class TodoUserController {
     },
   })
   async getUser(
-    @param.path.string('id') id: typeof Todo.prototype.id,
+    @param.path.string('id') id: typeof Task.prototype.id,
   ): Promise<User> {
-    return this.todoRepository.user(id);
+    return this.taskRepository.user(id);
   }
 }

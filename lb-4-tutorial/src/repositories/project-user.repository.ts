@@ -4,7 +4,10 @@ import {DatabaseDataSource} from '../datasources';
 import {ProjectUser, ProjectUserRelations, Project, User} from '../models';
 import {ProjectRepository} from './project.repository';
 import {UserRepository} from './user.repository';
-
+export type ProjectUserCredentials = {
+  userId: string,
+  projectId: string
+}
 export class ProjectUserRepository extends DefaultCrudRepository<
   ProjectUser,
   typeof ProjectUser.prototype.id,

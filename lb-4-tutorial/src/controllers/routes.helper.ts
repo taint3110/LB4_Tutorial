@@ -2,22 +2,37 @@ export const userRoutes : {
   signup: string,
   login: string,
   getMe: string,
-  readTodo: string,
-  readAdminTodo: string,
-  readUserTodo: string,
+  readTask: string,
+  readAdminTask: string,
+  readUserTask: string,
   createProject: string,
-  createTodo: string,
-  createUserTodo: string,
+  createTask: string,
+  createUserTask: string,
 } = {
   signup: "/signup",
   login: "/login",
   getMe: "/users/me",
-  readTodo: "/users/readTodo{id}",
-  readAdminTodo: "/users/readAdminTodo{id}",
-  readUserTodo: "/users/readUserTodo{id}",
+  readTask: "/users/readTask{id}",
+  readAdminTask: "/users/readAdminTask{id}",
+  readUserTask: "/users/readUserTask{id}",
   createProject: "/users/createProject",
-  createTodo: "/users/createTodo{id}",
-  createUserTodo: "/users/createUserTodo{id}"
+  createTask: "/users/createTask{id}",
+  createUserTask: "/users/createUserTask{id}"
 }
+
+export const projectRoutes : {
+  createProjectUser: string,
+  getProjectUser: string,
+} = {
+  createProjectUser: '/projects/{id}/project-users',
+  getProjectUser: '/projects/{id}/project-users',
+}
+
+export const taskRoutes : {
+  getTasksInProject: string,
+} = {
+  getTasksInProject: "/tasks"
+}
+
 
 

@@ -1,7 +1,7 @@
-import { UserRepository, TodoRepository, ProjectRepository } from './../repositories'
+import { UserRepository, TaskRepository, ProjectRepository, ProjectUserRepository } from './../repositories'
 import { HttpErrors } from '@loopback/rest';
 import * as isEmail from 'isemail';
-import { Credentials, TodoCredentials, ProjectCredentials } from '../repositories/index';
+import { Credentials, TaskCredentials, ProjectCredentials, ProjectUserCredentials } from '../repositories/index';
 export async function validateCredentials(credentials: Credentials, userRepository: UserRepository) {
   if (!isEmail.validate(credentials.email)) {
     throw new HttpErrors.UnprocessableEntity('invalid Email');
@@ -22,14 +22,14 @@ export async function validateCredentials(credentials: Credentials, userReposito
   }
 }
 
-export async function validateTodoCredentials(credentials: TodoCredentials, todoRepository: TodoRepository) {
-  const foundTodo = await todoRepository.findOne({
+export async function validateTaskCredentials(credentials: TaskCredentials, taskRepository: TaskRepository) {
+  const foundTask = await taskRepository.findOne({
     where: {
       title: credentials.title
     }
   });
-  if (foundTodo !== null) {
-    throw new HttpErrors.UnprocessableEntity('Todo with this title already exists');
+  if (foundTask !== null) {
+    throw new HttpErrors.UnprocessableEntity('Task with this title already exists');
   }
 }
 
@@ -41,5 +41,17 @@ export async function validateProjectCredentials(projectCredentials: ProjectCred
   });
   if (foundProject !== null) {
     throw new HttpErrors.UnprocessableEntity('Project with this title already exists');
+  }
+}
+
+export async function validateProjectUserCredentials(projectUserCredentials: ProjectUserCredentials, projectUserRepository: ProjectUserRepository) {
+  const foundProjectUser = await projectUserRepository.findOne({
+    where: {
+      userId: projectUserCredentials.userId,
+      projectId: projectUserCredentials.projectId,
+    }
+  });
+  if (foundProjectUser !== null) {
+    throw new HttpErrors.UnprocessableEntity('User is already on this project');
   }
 }

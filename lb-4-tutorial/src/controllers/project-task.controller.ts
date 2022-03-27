@@ -17,22 +17,22 @@ import {
 } from '@loopback/rest';
 import {
   Project,
-  Todo,
+  Task,
 } from '../models';
 import {ProjectRepository} from '../repositories';
 
-export class ProjectTodoController {
+export class ProjectTaskController {
   constructor(
     @repository(ProjectRepository) protected projectRepository: ProjectRepository,
   ) { }
 
-  @get('/projects/{id}/todos', {
+  @get('/projects/{id}/tasks', {
     responses: {
       '200': {
-        description: 'Array of Project has many Todo',
+        description: 'Array of Project has many Task',
         content: {
           'application/json': {
-            schema: {type: 'array', items: getModelSchemaRef(Todo)},
+            schema: {type: 'array', items: getModelSchemaRef(Task)},
           },
         },
       },
@@ -40,16 +40,16 @@ export class ProjectTodoController {
   })
   async find(
     @param.path.string('id') id: string,
-    @param.query.object('filter') filter?: Filter<Todo>,
-  ): Promise<Todo[]> {
-    return this.projectRepository.todos(id).find(filter);
+    @param.query.object('filter') filter?: Filter<Task>,
+  ): Promise<Task[]> {
+    return this.projectRepository.tasks(id).find(filter);
   }
 
-  @post('/projects/{id}/todos', {
+  @post('/projects/{id}/tasks', {
     responses: {
       '200': {
         description: 'Project model instance',
-        content: {'application/json': {schema: getModelSchemaRef(Todo)}},
+        content: {'application/json': {schema: getModelSchemaRef(Task)}},
       },
     },
   })
@@ -58,22 +58,22 @@ export class ProjectTodoController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Todo, {
-            title: 'NewTodoInProject',
+          schema: getModelSchemaRef(Task, {
+            title: 'NewTaskInProject',
             exclude: ['id'],
             optional: ['projectId']
           }),
         },
       },
-    }) todo: Omit<Todo, 'id'>,
-  ): Promise<Todo> {
-    return this.projectRepository.todos(id).create(todo);
+    }) task: Omit<Task, 'id'>,
+  ): Promise<Task> {
+    return this.projectRepository.tasks(id).create(task);
   }
 
-  @patch('/projects/{id}/todos', {
+  @patch('/projects/{id}/tasks', {
     responses: {
       '200': {
-        description: 'Project.Todo PATCH success count',
+        description: 'Project.Task PATCH success count',
         content: {'application/json': {schema: CountSchema}},
       },
     },
@@ -83,28 +83,28 @@ export class ProjectTodoController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Todo, {partial: true}),
+          schema: getModelSchemaRef(Task, {partial: true}),
         },
       },
     })
-    todo: Partial<Todo>,
-    @param.query.object('where', getWhereSchemaFor(Todo)) where?: Where<Todo>,
+    task: Partial<Task>,
+    @param.query.object('where', getWhereSchemaFor(Task)) where?: Where<Task>,
   ): Promise<Count> {
-    return this.projectRepository.todos(id).patch(todo, where);
+    return this.projectRepository.tasks(id).patch(task, where);
   }
 
-  @del('/projects/{id}/todos', {
+  @del('/projects/{id}/tasks', {
     responses: {
       '200': {
-        description: 'Project.Todo DELETE success count',
+        description: 'Project.Task DELETE success count',
         content: {'application/json': {schema: CountSchema}},
       },
     },
   })
   async delete(
     @param.path.string('id') id: string,
-    @param.query.object('where', getWhereSchemaFor(Todo)) where?: Where<Todo>,
+    @param.query.object('where', getWhereSchemaFor(Task)) where?: Where<Task>,
   ): Promise<Count> {
-    return this.projectRepository.todos(id).delete(where);
+    return this.projectRepository.tasks(id).delete(where);
   }
 }

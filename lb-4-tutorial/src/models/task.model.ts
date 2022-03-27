@@ -5,7 +5,7 @@ import { PriorityEnum, StatusEnum } from './enum';
 
 
 @model()
-export class Todo extends Entity {
+export class Task extends Entity {
   @property({
     type: 'string',
     id: true,
@@ -73,6 +73,12 @@ export class Todo extends Entity {
   isDeleted?: boolean;
 
   @property({
+    type: 'boolean',
+    default: false
+  })
+  isCreatedByAdmin?: boolean;
+
+  @property({
     type: 'string',
   })
   projectId?: string;
@@ -80,18 +86,18 @@ export class Todo extends Entity {
   @belongsTo(() => User)
   userId: string;
 
-  @belongsTo(() => Todo, {name: 'parent'})
+  @belongsTo(() => Task, {name: 'parent'})
   parentId: string;
 
-  constructor(data?: Partial<Todo>) {
+  constructor(data?: Partial<Task>) {
     super(data);
   }
 }
 
-export interface TodoRelations {
+export interface TaskRelations {
   project?: ProjectWithRelations;
   assignedTo?: UserWithRelations;
-  parent?: TodoWithRelations;
+  parent?: TaskWithRelations;
 }
 
-export type TodoWithRelations = Todo & TodoRelations;
+export type TaskWithRelations = Task & TaskRelations;
