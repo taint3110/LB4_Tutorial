@@ -1,8 +1,10 @@
 import {inject, lifeCycleObserver, LifeCycleObserver} from '@loopback/core';
 import {juggler} from '@loopback/repository';
 import {configs} from './constant';
-import dotenv from 'dotenv';
-dotenv.config();
+import * as dotenv from 'dotenv';
+
+dotenv.config({ path: '.env' });
+console.log(process.env.MONGODB_URL)
 const config = {
   name: 'database',
   connector: 'mongodb',

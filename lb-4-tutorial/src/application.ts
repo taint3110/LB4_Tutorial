@@ -14,10 +14,10 @@ import {MySequence} from './sequence';
 import {BcryptHasher} from './services/hash.password';
 import {JWTService} from './services/jwt-service';
 import {MyUserService} from './services/user-service';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import {CronComponent} from '@loopback/cron';
 import * as CronJobs from './cronJob/index'
-dotenv.config();
+
 export {ApplicationConfig};
 export class AuthApplication extends BootMixin(
   ServiceMixin(RepositoryMixin(RestApplication)),
@@ -25,7 +25,7 @@ export class AuthApplication extends BootMixin(
   constructor(options: ApplicationConfig = {}) {
 
     super(options);
-
+    dotenv.config({ path: '.env' });
     this.setupBinding();
 
     this.addSecuritySpec();
