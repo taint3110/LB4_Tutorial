@@ -32,7 +32,7 @@
     "preopenapi-spec": "npm run build",
     "openapi-spec": "node ./dist/openapi-spec",
     "prestart": "npm run rebuild",
-    "start": "node -r dotenv/config -r source-map-support/register .",
+    "start": "node -r source-map-support/register .",
     "clean": "lb-clean dist *.tsbuildinfo .eslintcache",
     "rebuild": "npm run clean && npm run build"
   },
@@ -63,6 +63,7 @@
     "dotenv": "^16.0.0",
     "isemail": "^3.2.0",
     "loopback-connector-mongodb": "^5.6.0",
+    "path": "^0.12.7",
     "tslib": "^2.0.0"
   },
   "devDependencies": {

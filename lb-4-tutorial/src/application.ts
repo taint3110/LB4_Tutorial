@@ -25,7 +25,6 @@ export class AuthApplication extends BootMixin(
   constructor(options: ApplicationConfig = {}) {
 
     super(options);
-    dotenv.config({ path: '.env' });
     this.setupBinding();
 
     this.addSecuritySpec();

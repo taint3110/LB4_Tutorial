@@ -1,16 +1,15 @@
 import {inject, lifeCycleObserver, LifeCycleObserver} from '@loopback/core';
 import {juggler} from '@loopback/repository';
 import {configs} from './constant';
-import * as dotenv from 'dotenv';
+import dotenv from 'dotenv';
+import path from "path"
+dotenv.config({ path: path.join(__dirname, '../', '.env') })
 
-dotenv.config({ path: '.env' });
-console.log(process.env.MONGODB_URL)
 const config = {
   name: 'database',
   connector: 'mongodb',
-  url: configs.MONGODB_URL,
+  url: configs.LOCAL_DB_URL,
   useNewUrlParser: true,
-  roles: [ "readWrite", "dbAdmin" ]
 };
 
 @lifeCycleObserver('datasource')

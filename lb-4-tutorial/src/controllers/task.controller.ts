@@ -68,7 +68,7 @@ export class TaskController {
       }
     })
     if(!currentProjectUser){
-      throw new HttpErrors.UnprocessableEntity('This user is not in this project');
+      throw new HttpErrors[401]('This user is not in this project');
     }
 
     if(currentProjectUser.role === RoleEnum.USER){
@@ -114,13 +114,13 @@ export class TaskController {
       }
     })
     if(!currentProjectUser){
-      throw new HttpErrors.UnprocessableEntity('This user is not in this project');
+      throw new HttpErrors[401]('This user is not in this project');
     }
     if(!foundProjectUser){
-      throw new HttpErrors.UnprocessableEntity('The tasks to read are not in this project');
+      throw new HttpErrors[404]('The tasks to read are not in this project');
     }
     if(currentProjectUser.role == RoleEnum.USER && foundProjectUser.role ==RoleEnum.ADMIN){
-      throw new HttpErrors.UnprocessableEntity('User cannot read tasks of admin');
+      throw new HttpErrors[401]('User cannot read tasks of admin');
     } 
     if(currentProjectUser.role == RoleEnum.USER){
       return this.userRepository.tasks(foundProjectUser.userId).find()
@@ -157,7 +157,7 @@ export class TaskController {
       }
     })
     if(!currentProjectUser){
-      throw new HttpErrors.UnprocessableEntity('User is not in this project');
+      throw new HttpErrors[409]('User is not in this project');
     }
     return this.taskRepository.updateById(taskLinkData.taskId, {
       parentId: taskLinkData.parentId 
@@ -199,6 +199,6 @@ export class TaskController {
     if(updatedTask[0] != null){
       return this.taskRepository.updateById(updatedTask[0].id, taskData) 
     }
-    throw new HttpErrors[404]('This user does not have the task requested to be updated');
+    throw new HttpErrors[404]('Does not have the task requested to be updated');
   }
 }

@@ -13,7 +13,7 @@ export async function validateCredentials(credentials: Credentials, userReposito
     }
   });
   if (foundUser !== null) {
-    throw new HttpErrors.UnprocessableEntity('this email already exists');
+    throw new HttpErrors[409]('this email already exists');
   }
   if (credentials.email.length < 8) {
     throw new HttpErrors.UnprocessableEntity('email length should be greater than 8')
@@ -30,7 +30,7 @@ export async function validateTaskData(taskData: TaskData, taskRepository: TaskR
     }
   });
   if (foundTask !== null) {
-    throw new HttpErrors.UnprocessableEntity('Task with this title already exists');
+    throw new HttpErrors[409]('Task with this title already exists');
   }
 }
 
@@ -41,7 +41,7 @@ export async function validateProjectData(projectData: ProjectData, projectRepos
     }
   });
   if (foundProject !== null) {
-    throw new HttpErrors.UnprocessableEntity('Project with this title already exists');
+    throw new HttpErrors[409]('Project with this title already exists');
   }
 }
 
@@ -58,10 +58,10 @@ export async function validateProjectUserData(projectUserData: ProjectUserData, 
     }
   })
   if (foundProjectUser !== null) {
-    throw new HttpErrors.UnprocessableEntity('User is already on this project');
+    throw new HttpErrors[409]('User is already on this project');
   }
   if (foundProject == null){
-    throw new HttpErrors.UnprocessableEntity('Project not found to create projectUser');
+    throw new HttpErrors[404]('Project not found to create projectUser');
   }
 }
 
@@ -73,6 +73,6 @@ export async function validateTaskLinkData(taskLinkData: TaskLinkData, taskRepos
   }
   const isSameProject: boolean = String(foundTask?.projectId) === String(foundParentTask?.projectId)
   if (!isSameProject){
-    throw new HttpErrors.Forbidden('Can only link two tasks in the same project');
+    throw new HttpErrors[409]('Can only link two tasks in the same project');
   }
 }
