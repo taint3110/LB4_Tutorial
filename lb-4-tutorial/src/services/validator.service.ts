@@ -16,10 +16,10 @@ export async function validateCredentials(credentials: Credentials, userReposito
     throw new HttpErrors[409]('this email already exists');
   }
   if (credentials.email.length < 8) {
-    throw new HttpErrors.UnprocessableEntity('email length should be greater than 8')
+    throw new HttpErrors.UnprocessableEntity('email length should be greater than 7 characters')
   }
   if (credentials.password.length < 8) {
-    throw new HttpErrors.UnprocessableEntity("password length should be greater than 8")
+    throw new HttpErrors.UnprocessableEntity("password length should be greater than 7 characters")
   }
 }
 
@@ -61,7 +61,7 @@ export async function validateProjectUserData(projectUserData: ProjectUserData, 
     throw new HttpErrors[409]('User is already on this project');
   }
   if (!foundProject){
-    throw new HttpErrors[404]('Project not found to create projectUser');
+    throw new HttpErrors[204]('Project not found to create projectUser');
   }
 }
 
@@ -69,7 +69,7 @@ export async function validateTaskLinkData(taskLinkData: TaskLinkData, taskRepos
   const foundTask = await taskRepository.findById(taskLinkData.taskId);
   const foundParentTask = await taskRepository.findById(taskLinkData.parentId)
   if (!foundTask || !foundParentTask) {
-    throw new HttpErrors[404]('One of two task does not exist');
+    throw new HttpErrors[204]('One of two task does not exist');
   }
   const isSameProject: boolean = String(foundTask?.projectId) === String(foundParentTask?.projectId)
   if (!isSameProject){

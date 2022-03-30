@@ -1,30 +1,31 @@
-import { Filter, FilterExcludingWhere, repository, Where } from '@loopback/repository';
-import { authenticate, AuthenticationBindings } from '@loopback/authentication';
-import { inject } from '@loopback/core';
-import { get, getJsonSchemaRef, post, param, getModelSchemaRef, requestBody, response } from '@loopback/rest';
-import { securityId, UserProfile } from '@loopback/security';
-import * as _ from 'lodash';
-import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
-import { User, Task, Project } from '../models';
-import { Credentials, TaskRepository, UserRepository, ProjectRepository } from '../repositories';
-import { validateCredentials, validateTaskData, validateProjectData } from '../services';
+import {authenticate} from '@loopback/authentication';
+import {inject} from '@loopback/core';
+import {
+  Count,
+  CountSchema,
+  Filter,
+  FilterExcludingWhere,
+  repository,
+  Where
+} from '@loopback/repository';
+import {
+  del, get,
+  getModelSchemaRef, param, patch, post, put, requestBody,
+  response
+} from '@loopback/rest';
+import {User} from '../models';
+import {UserRepository} from '../repositories';
 import { BcryptHasher } from '../services/hash.password';
 import { JWTService } from '../services/jwt-service';
 import { MyUserService } from '../services/user-service';
 import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
-import { userRoutes } from './routes.helper'
-import { authorize } from '@loopback/authorization';
-import { basicAuthorization } from '../services/basic.authorizor';
+import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
 
-
+@authenticate('jwt')
 export class UserController {
   constructor(
     @repository(UserRepository)
     public userRepository : UserRepository,
-    @repository(TaskRepository)
-    public taskRepository : TaskRepository,
-    @repository(ProjectRepository)
-    public projectRepository : ProjectRepository,
     @inject(PasswordHasherBindings.PASSWORD_HASHER)
     public hasher: BcryptHasher,
     @inject(UserServiceBindings.USER_SERVICE)
@@ -33,72 +34,137 @@ export class UserController {
     public jwtService: JWTService,
   ) {}
 
-  @post(userRoutes.signup, {
-    responses: {
-      '200': {
-        description: 'Sign up',
-        content: {
-          schema: getJsonSchemaRef(User)
-        }
-      }
-    }
+  @post('/users')
+  @response(200, {
+    description: 'User model instance',
+    content: {'application/json': {schema: getModelSchemaRef(User)}},
   })
-  async signup(@requestBody() userData: User) {
-    await validateCredentials(_.pick(userData, ['email', 'password']), this.userRepository);
-    userData.password = await this.hasher.hashPassword(userData.password)
-    const savedUser = await this.userRepository.create(userData);
-    return _.omit(savedUser, 'password');
+  async create(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(User, {
+            title: 'NewUser',
+            exclude: ['id'],
+          }),
+        },
+      },
+    })
+    user: Omit<User, 'id'>,
+  ): Promise<User> {
+    return this.userRepository.create(user);
   }
 
-  @post(userRoutes.login, {
-    responses: {
-      '200': {
-        description: 'Token',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                token: {
-                  type: 'string'
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  @get('/users/count')
+  @response(200, {
+    description: 'User model count',
+    content: {'application/json': {schema: CountSchema}},
   })
-  async login(
-    @requestBody() credentials: Credentials,
-  ): Promise<{ token: string }> {
-    const user = await this.userService.verifyCredentials(credentials);
-    const userProfile = await this.userService.convertToUserProfile(user);
-    const token = await this.jwtService.generateToken(userProfile);
-    return Promise.resolve({ token: token })
+  async count(
+    @param.where(User) where?: Where<User>,
+  ): Promise<Count> {
+    return this.userRepository.count(where);
   }
 
-
-  @authenticate("jwt")
-  @authorize({ allowedRoles: ['user'], voters: [basicAuthorization] })
-  @get(userRoutes.getMe, {
-    security: OPERATION_SECURITY_SPEC,
-    responses: {
-      '200': {
-        description: 'The current user profile',
-        content: {
-          'application/json': {
-            schema: getJsonSchemaRef(User),
-          },
+  @get('/users')
+  @response(200, {
+    description: 'Array of User model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(User, {includeRelations: true}),
         },
       },
     },
   })
-  async me(
-    @inject(AuthenticationBindings.CURRENT_USER)
-    currentUser: UserProfile,
-  ): Promise<UserProfile> {
-    return Promise.resolve(currentUser);
+  async find(
+    @param.filter(User) filter?: Filter<User>,
+  ): Promise<User[]> {
+    return this.userRepository.find(filter);
   }
 
+  @patch('/users')
+  @response(200, {
+    description: 'User PATCH success count',
+    content: {'application/json': {schema: CountSchema}},
+  })
+  async updateAll(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(User, {partial: true}),
+        },
+      },
+    })
+    user: User,
+    @param.where(User) where?: Where<User>,
+  ): Promise<Count> {
+    const userData = {
+      ...user,
+    }
+    if (userData?.password) {
+      userData.password = await this.hasher.hashPassword(userData.password);
+    }
+    return this.userRepository.updateAll(userData, where);
+  }
+
+  @get('/users/{id}')
+  @response(200, {
+    description: 'User model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(User, {includeRelations: true}),
+      },
+    },
+  })
+  async findById(
+    @param.path.string('id') id: string,
+    @param.filter(User, {exclude: 'where'}) filter?: FilterExcludingWhere<User>
+  ): Promise<User> {
+    return this.userRepository.findById(id, filter);
+  }
+
+  @patch('/users/{id}')
+  @response(204, {
+    description: 'User PATCH success',
+  })
+  async updateById(
+    @param.path.string('id') id: string,
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(User, {partial: true}),
+        },
+      },
+    })
+    user: User,
+  ): Promise<void> {
+    const userData = {
+      ...user,
+    }
+    if (userData?.password) {
+      userData.password = await this.hasher.hashPassword(userData.password);
+    }
+    await this.userRepository.updateById(id, userData);
+  }
+
+  @put('/users/{id}')
+  @response(204, {
+    description: 'User PUT success',
+  })
+  async replaceById(
+    @param.path.string('id') id: string,
+    @requestBody() user: User,
+  ): Promise<void> {
+    await this.userRepository.replaceById(id, user);
+  }
+
+  @del('/users/{id}')
+  @response(204, {
+    description: 'User DELETE success',
+  })
+  async deleteById(@param.path.string('id') id: string): Promise<void> {
+    await this.userRepository.deleteById(id);
+  }
 }

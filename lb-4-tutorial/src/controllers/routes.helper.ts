@@ -1,11 +1,11 @@
-export const userRoutes : {
+export const authRoutes : {
   signup: string,
   login: string,
   getMe: string,
 } = {
-  signup: "/signup",
-  login: "/login",
-  getMe: "/users/me",
+  signup: "/auth/signup",
+  login: "/auth/login",
+  getMe: "/auth/me",
 }
 
 export const projectRoutes : {

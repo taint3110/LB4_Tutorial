@@ -9,3 +9,4 @@ export * from './task-user.controller';
 export * from './project-user-project.controller';
 export * from './project-user-user.controller';
 export * from './task-task.controller';
+export * from './auth.controller';

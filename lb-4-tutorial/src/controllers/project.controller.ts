@@ -12,7 +12,7 @@ import { BcryptHasher } from '../services/hash.password';
 import { JWTService } from '../services/jwt-service';
 import { MyUserService } from '../services/user-service';
 import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
-import { projectRoutes, userRoutes } from './routes.helper'
+import { projectRoutes, authRoutes } from './routes.helper'
 import { authorize } from '@loopback/authorization';
 import { basicAuthorization } from '../services/basic.authorizor';
 @authenticate("jwt")
@@ -38,14 +38,24 @@ export class ProjectController {
         description: 'Admin create project',
         content: {
           'application/json': {
-            schema: getJsonSchemaRef(Project),
+            schema: getModelSchemaRef(Project, {
+              title: 'NewProject',
+            }),
           },
         },
       },
     },
   })
   async createProject(
-    @requestBody() projectData: Project) {
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Project, {
+            exclude: ['id', 'createdAt', 'updatedAt', 'isDeleted'],
+          }),
+        },
+      },
+    }) projectData: Omit<Project, 'id'>) {
     await validateProjectData(_.pick(projectData, ['title']), this.projectRepository);
     const savedProject = await this.projectRepository.create(projectData)
     return savedProject;

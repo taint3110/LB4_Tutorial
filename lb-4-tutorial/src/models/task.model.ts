@@ -57,7 +57,7 @@ export class Task extends Entity {
     type: 'date',
     default: new Date(),
   })
-  createAt?: Date;
+  createdAt?: Date;
 
   @property({
     type: 'date',

@@ -19,6 +19,7 @@ import { basicAuthorization } from '../services/basic.authorizor';
 import { HttpErrors } from '@loopback/rest';
 import { RoleEnum } from '../models/enum';
 import { partial } from 'lodash';
+import { TaskLinkRequestBody } from '../type/taskLink-schema';
 
 @authenticate("jwt")
 export class TaskController {
@@ -46,13 +47,8 @@ export class TaskController {
   @post(taskRoutes.createUserTask, {
     security: OPERATION_SECURITY_SPEC,
     responses: {
-      '200': {
+      '204': {
         description: 'User create user task',
-        content: {
-          'application/json': {
-            schema: getJsonSchemaRef(Task),
-          },
-        },
       },
     },
   })
@@ -60,14 +56,24 @@ export class TaskController {
     @param.path.string('id') id: typeof User.prototype.id,
     @inject(AuthenticationBindings.CURRENT_USER)
     currentUser: UserProfile,
-    @requestBody() taskData: Task) {
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Task, {
+            title: "NewTask",
+            exclude: ['id', 'isCreatedByAdmin'],
+          }),
+        },
+      },
+    }) taskData: Omit<Task, 'id' | 'isCreatedByAdmin'>) {
     await validateTaskData(_.pick(taskData, ['title']), this.taskRepository);
     if(currentUser.role === RoleEnum.USER){
       const createdByUserTask = await this.userRepository.tasks(id).create(taskData)
       return createdByUserTask
     } 
     if(currentUser.role === RoleEnum.ADMIN) {
-      taskData.isCreatedByAdmin = true
+      set(taskData, 'isCreatedByAdmin', true)
+      set(taskData, 'createdBy', currentUser[securityId])
       const createdByAdminTask = await this.userRepository.tasks(id).create(taskData)
       return createdByAdminTask
     }
@@ -87,7 +93,7 @@ export class TaskController {
         'application/json': {
           schema: getModelSchemaRef(Task, {
             title: 'NewTask',
-            exclude: ['id'],
+            exclude: ['id', 'createdAt', 'updatedAt', 'isDeleted',],
           }),
         },
       },
@@ -133,10 +139,10 @@ export class TaskController {
       }
     })
     if(!currentProjectUser){
-      throw new HttpErrors[401]('This user is not in this project');
+      throw new HttpErrors[204]('This user is not in this project');
     }
     if(!foundProjectUser){
-      throw new HttpErrors[401]('The tasks to read are not in this project');
+      throw new HttpErrors[204]('The tasks to read are not in this project');
     }
     if(currentProjectUser.role === RoleEnum.USER && foundProjectUser.role ===RoleEnum.ADMIN){
       throw new HttpErrors[401]('User cannot read tasks of admin');
@@ -183,18 +189,13 @@ export class TaskController {
     responses: {
       '204': {
         description: 'User creates task link',
-        content: {
-          'application/json': {
-            schema: getModelSchemaRef(Task),
-          },
-        },
       },
     },
   })
   async createTaskLink(
     @inject(AuthenticationBindings.CURRENT_USER)
     currentUser: UserProfile,
-    @requestBody() taskLinkData: TaskLinkData):Promise<void> {
+    @requestBody(TaskLinkRequestBody) taskLinkData: TaskLinkData):Promise<void> {
     await validateTaskLinkData(taskLinkData, this.taskRepository)
     const parentTask = await this.taskRepository.findById(taskLinkData.parentId)
     return this.taskRepository.updateById(taskLinkData.taskId, {
@@ -205,13 +206,8 @@ export class TaskController {
   @patch(taskRoutes.updateTask, {
     security: OPERATION_SECURITY_SPEC,
     responses: {
-      '200': {
-        description: 'User updates task',
-        content: {
-          'application/json': {
-            schema: getJsonSchemaRef(Task),
-          },
-        },
+      '204': {
+        description: 'task PATCH success',
       },
     },
   })
