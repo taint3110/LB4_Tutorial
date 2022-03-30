@@ -15,7 +15,7 @@ export async function main(options: ApplicationConfig = {}) {
 if (require.main === module) {
   const config = {
     rest: {
-      port: +(process.env.PORT ?? 3000),
+      port: +(process.env.PORT ?? 3001),
       host: process.env.HOST,
       gracePeriodForClose: 5000, 
       openApiSpec: {

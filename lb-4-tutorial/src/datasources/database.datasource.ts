@@ -5,7 +5,7 @@ import {configs} from './constant';
 const config = {
   name: 'database',
   connector: 'mongodb',
-  url: configs.LOCAL_DB_URL,
+  url: configs.MONGODB_URL,
   useNewUrlParser: true,
 };
 

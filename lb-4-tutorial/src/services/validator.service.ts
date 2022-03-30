@@ -12,26 +12,26 @@ export async function validateCredentials(credentials: Credentials, userReposito
       email: credentials.email
     }
   });
-  if (foundUser !== null) {
+  if (foundUser) {
     throw new HttpErrors[409]('this email already exists');
   }
   if (credentials.email.length < 8) {
     throw new HttpErrors.UnprocessableEntity('email length should be greater than 8')
   }
   if (credentials.password.length < 8) {
-    throw new HttpErrors.UnprocessableEntity("passwordd length should be greater than 8")
+    throw new HttpErrors.UnprocessableEntity("password length should be greater than 8")
   }
 }
 
 export async function validateTaskData(taskData: TaskData, taskRepository: TaskRepository) {
-  const foundTask = await taskRepository.findOne({
-    where: {
-      title: taskData.title
-    }
-  });
-  if (foundTask !== null) {
-    throw new HttpErrors[409]('Task with this title already exists');
-  }
+  // const foundTask = await taskRepository.findOne({
+  //   where: {
+  //     title: taskData.title
+  //   }
+  // });
+  // if (foundTask) {
+  //   throw new HttpErrors[409]('Task with this title already exists');
+  // }
 }
 
 export async function validateProjectData(projectData: ProjectData, projectRepository: ProjectRepository) {
@@ -40,7 +40,7 @@ export async function validateProjectData(projectData: ProjectData, projectRepos
       title: projectData.title
     }
   });
-  if (foundProject !== null) {
+  if (foundProject) {
     throw new HttpErrors[409]('Project with this title already exists');
   }
 }
@@ -57,10 +57,10 @@ export async function validateProjectUserData(projectUserData: ProjectUserData, 
       id: projectUserData.projectId
     }
   })
-  if (foundProjectUser !== null) {
+  if (foundProjectUser) {
     throw new HttpErrors[409]('User is already on this project');
   }
-  if (foundProject == null){
+  if (!foundProject){
     throw new HttpErrors[404]('Project not found to create projectUser');
   }
 }

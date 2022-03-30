@@ -20,16 +20,18 @@ export const projectRoutes : {
 
 export const taskRoutes : {
   getTasksInProject: string,
+  getTask: string,
   updateTask: string,
   createTaskLink: string,
   createTask: string,
   createUserTask: string,
 } = {
-  getTasksInProject: "/tasks/get-task/{id}",
+  getTasksInProject: "/tasks/projects/{projectId}/users/{userId}",
+  getTask: "/tasks/{id}",
   updateTask: "/tasks/{id}",
   createTaskLink: "/tasks/link",
-  createTask: "/tasks/create-task/{id}",
-  createUserTask: "/users/create-task/{id}"
+  createTask: "/tasks",
+  createUserTask: "/tasks/users/{id}/tasks"
 }
 
 

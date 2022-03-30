@@ -1,24 +1,17 @@
 version: "3" 
 #NETWORK 
 networks:  
-  mongoNetwork: 
+  my-network: 
     driver: bridge 
 services:  
-  myDatabase-service: 
-    container_name: 'myDatabase' 
+  loopback-api-service: 
+    container_name: 'loopback-api-service' 
     build:  
-      context: ./
+      context: ./lb-4-tutorial
       dockerfile: Dockerfile 
-    image: 'mongo' 
+    image: lbapi
     restart: always 
-    environment: 
-      - MONGO_INITDB_DATABASE=dev 
-      - MONGO_INITDB_ROOT_USERNAME=root 
-      - MONGO_INITDB_ROOT_PASSWORD=password
- 
-    volumes: 
-      - ./storages/dev/data/db:/data/db 
     ports: 
-      - 27017:27017 
+      - 3001:3001 
     networks: 
-      - mongoNetwork
+      - my-network

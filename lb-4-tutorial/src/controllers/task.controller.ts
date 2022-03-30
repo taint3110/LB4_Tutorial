@@ -4,8 +4,9 @@ import { inject } from '@loopback/core';
 import { get, getJsonSchemaRef, post, param, getModelSchemaRef, requestBody, response, patch, put, del } from '@loopback/rest';
 import { securityId, UserProfile } from '@loopback/security';
 import * as _ from 'lodash';
+import set from 'lodash/set';
 import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
-import { User, Task, Project, ProjectUser } from '../models';
+import { User, Task, Project, ProjectUser, TaskWithRelations } from '../models';
 import { ProjectId, TaskRepository, TaskLinkData, UserRepository, ProjectRepository, ProjectUserRepository, ProjectUserData } from '../repositories';
 import { validateProjectUserData, validateTaskData, validateTaskLinkData } from '../services';
 import { BcryptHasher } from '../services/hash.password';
@@ -61,28 +62,46 @@ export class TaskController {
     currentUser: UserProfile,
     @requestBody() taskData: Task) {
     await validateTaskData(_.pick(taskData, ['title']), this.taskRepository);
-    const currentProjectUser = await this.projectUserRepository.findOne({
-      where:{
-        userId: currentUser[securityId],
-        projectId: taskData.projectId
-      }
-    })
-    if(!currentProjectUser){
-      throw new HttpErrors[401]('This user is not in this project');
-    }
-
-    if(currentProjectUser.role === RoleEnum.USER){
+    if(currentUser.role === RoleEnum.USER){
       const createdByUserTask = await this.userRepository.tasks(id).create(taskData)
       return createdByUserTask
     } 
-    if(currentProjectUser.role === RoleEnum.ADMIN) {
+    if(currentUser.role === RoleEnum.ADMIN) {
       taskData.isCreatedByAdmin = true
       const createdByAdminTask = await this.userRepository.tasks(id).create(taskData)
       return createdByAdminTask
     }
   }
 
-  @post(taskRoutes.getTasksInProject, {
+  @post(taskRoutes.createTask)
+  @response(200, {
+    security: OPERATION_SECURITY_SPEC,
+    description: 'Task model instance',
+    content: {'application/json': {schema: getModelSchemaRef(Task)}},
+  })
+  async create(
+    @inject(AuthenticationBindings.CURRENT_USER)
+    currentUser: UserProfile,
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Task, {
+            title: 'NewTask',
+            exclude: ['id'],
+          }),
+        },
+      },
+    })
+    task: Omit<Task, 'id' | 'isCreatedByAdmin'>,
+  ): Promise<Task> {
+    const role: RoleEnum = currentUser?.role ?? RoleEnum.USER;
+    const userId: string = currentUser?.id;
+    set(task, 'isCreatedByAdmin', role === RoleEnum.ADMIN)
+    set(task, 'createdBy', userId);
+    return this.taskRepository.create(task);
+  }
+
+  @get(taskRoutes.getTasksInProject, {
     security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
@@ -96,40 +115,68 @@ export class TaskController {
     },
   })
   async getTasksInProject(
-    @param.path.string('id') id: typeof User.prototype.id,
+    @param.path.string('userId') userId: typeof User.prototype.id,
+    @param.path.string('projectId') projectId: typeof Project.prototype.id,
     @inject(AuthenticationBindings.CURRENT_USER)
     currentUser: UserProfile,
-    @requestBody() data: ProjectId
   ) {
     const foundProjectUser = await this.projectUserRepository.findOne({
       where:{
-        userId: id,
-        projectId: data.id
+        userId: userId,
+        projectId: projectId,
       }
     })
     const currentProjectUser = await this.projectUserRepository.findOne({
       where:{
         userId: currentUser[securityId],
-        projectId: data.id
+        projectId: projectId
       }
     })
     if(!currentProjectUser){
       throw new HttpErrors[401]('This user is not in this project');
     }
     if(!foundProjectUser){
-      throw new HttpErrors[404]('The tasks to read are not in this project');
+      throw new HttpErrors[401]('The tasks to read are not in this project');
     }
-    if(currentProjectUser.role == RoleEnum.USER && foundProjectUser.role ==RoleEnum.ADMIN){
+    if(currentProjectUser.role === RoleEnum.USER && foundProjectUser.role ===RoleEnum.ADMIN){
       throw new HttpErrors[401]('User cannot read tasks of admin');
     } 
-    if(currentProjectUser.role == RoleEnum.USER){
+    if(currentProjectUser.role !== RoleEnum.ADMIN ){
       return this.userRepository.tasks(foundProjectUser.userId).find()
     } 
-    if(currentProjectUser.role == RoleEnum.ADMIN) {
+    if(currentProjectUser.role === RoleEnum.ADMIN) {
       return this.projectRepository.tasks(foundProjectUser.projectId).find()
     }
-    throw new HttpErrors.UnprocessableEntity('You are not currently in any project');
   }
+
+  @get(taskRoutes.getTask)
+  @response(200, {
+    security: OPERATION_SECURITY_SPEC,
+    description: 'Task model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Task, {includeRelations: true}),
+      },
+    },
+  })
+  async findById(
+    @inject(AuthenticationBindings.CURRENT_USER)
+    currentUser: UserProfile,
+    @param.path.string('id') id: string,
+    @param.filter(Task, {exclude: 'where'}) filter?: FilterExcludingWhere<Task>,
+  ): Promise<Task> {
+    const role: RoleEnum = currentUser.role ?? RoleEnum.USER;
+    const userId: string = currentUser[securityId];
+    const task: TaskWithRelations = await this.taskRepository.findById(
+      id,
+      filter,
+    );
+    if (role !== RoleEnum.ADMIN && task?.isCreatedByAdmin && task?.userId !== userId) {
+      throw new HttpErrors.Unauthorized('This task can not be seen by user');
+    }
+    return task;
+  }
+
 
   @post(taskRoutes.createTaskLink, {
     security: OPERATION_SECURITY_SPEC,
@@ -150,15 +197,6 @@ export class TaskController {
     @requestBody() taskLinkData: TaskLinkData):Promise<void> {
     await validateTaskLinkData(taskLinkData, this.taskRepository)
     const parentTask = await this.taskRepository.findById(taskLinkData.parentId)
-    const currentProjectUser = await this.projectUserRepository.findOne({
-      where:{
-        userId: currentUser[securityId],
-        projectId: parentTask.projectId
-      }
-    })
-    if(!currentProjectUser){
-      throw new HttpErrors[409]('User is not in this project');
-    }
     return this.taskRepository.updateById(taskLinkData.taskId, {
       parentId: taskLinkData.parentId 
     })
@@ -188,7 +226,7 @@ export class TaskController {
         },
       },
     }) taskData: Task):Promise<void> {
-    if(taskData.title != null){
+    if(taskData.title){
       await validateTaskData(_.pick(taskData, ['title']), this.taskRepository);
     }
     const updatedTask = await this.userRepository.tasks(currentUser[securityId]).find({
@@ -196,9 +234,26 @@ export class TaskController {
         id: id
       }
     })
-    if(updatedTask[0] != null){
       return this.taskRepository.updateById(updatedTask[0].id, taskData) 
-    }
-    throw new HttpErrors[404]('Does not have the task requested to be updated');
+
+  }
+
+  @put('/tasks/{id}')
+  @response(204, {
+    description: 'Task PUT success',
+  })
+  async replaceById(
+    @param.path.string('id') id: string,
+    @requestBody() task: Task,
+  ): Promise<void> {
+    await this.taskRepository.replaceById(id, task);
+  }
+
+  @del('/tasks/{id}')
+  @response(204, {
+    description: 'Task DELETE success',
+  })
+  async deleteById(@param.path.string('id') id: string): Promise<void> {
+    await this.taskRepository.deleteById(id);
   }
 }
