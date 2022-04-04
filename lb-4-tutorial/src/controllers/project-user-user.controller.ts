@@ -12,6 +12,8 @@ import {
 } from '../models';
 import {ProjectUserRepository} from '../repositories';
 
+import { authenticate } from '@loopback/authentication';
+@authenticate("jwt")
 export class ProjectUserUserController {
   constructor(
     @repository(ProjectUserRepository)

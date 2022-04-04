@@ -20,7 +20,8 @@ import {
   Task,
 } from '../models';
 import {ProjectRepository} from '../repositories';
-
+import { authenticate } from '@loopback/authentication';
+@authenticate("jwt")
 export class ProjectTaskController {
   constructor(
     @repository(ProjectRepository) protected projectRepository: ProjectRepository,
